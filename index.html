@@ -161,6 +161,8 @@
             <source src="https://s3.free-shoutcast.com/stream/18086" type="audio/mpeg">
             Your browser does not support the audio element.
         </audio>
+        <div id="streamStatus" style="display: none; text-align: center; color: #FFA500; margin-top: 10px;"></div>
+
         <button id="recordButton" class="download-btn" onclick="toggleRecording()">
             <i class="fas fa-record-vinyl"></i> Start Recording
         </button>
@@ -189,15 +191,16 @@
         let isRecording = false;
         let sourceNode;
         let destinationNode;
-
-        document.addEventListener('DOMContentLoaded', function() {
+        
+document.addEventListener('DOMContentLoaded', function() {
     const audioElement = document.getElementById('player');
+    const streamStatus = document.getElementById('streamStatus');
+
     player = new Plyr(audioElement, {
         controls: ['play', 'progress', 'current-time', 'mute', 'volume']
     });
 
     player.on('ready', () => {
-        // We'll set up audio context after user interaction
         player.elements.buttons.play[0].addEventListener('click', initializeAudioOnce);
     });
 
@@ -205,10 +208,36 @@
         if (audioContext && audioContext.state === 'suspended') {
             audioContext.resume();
         }
-        audioElement.play().catch(e => console.error("Playback failed:", e));
+        audioElement.play().catch(e => {
+            console.error("Playback failed:", e);
+            showStreamStatus("No program available now. Please try again later.");
+        });
+    });
+
+    audioElement.addEventListener('error', (e) => {
+        console.error("Audio error:", e);
+        showStreamStatus("No program available now. Please try again later.");
+    });
+
+    // Add timeupdate event listener to hide the message if stream starts playing
+    audioElement.addEventListener('timeupdate', () => {
+        if (!audioElement.paused) {
+            hideStreamStatus();
+        }
     });
 });
 
+function showStreamStatus(message) {
+    const streamStatus = document.getElementById('streamStatus');
+    streamStatus.textContent = message;
+    streamStatus.style.display = 'block';
+    player.pause(); // Pause the player when there's an error
+}
+
+function hideStreamStatus() {
+    const streamStatus = document.getElementById('streamStatus');
+    streamStatus.style.display = 'none';
+}
 function initializeAudioOnce() {
     if (!audioContext) {
         setupAudioContext();
