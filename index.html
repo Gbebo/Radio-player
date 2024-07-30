@@ -336,20 +336,15 @@ function initializeAudioOnce() {
             shareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
             break;
         case 'whatsapp':
-            // Check if it's a mobile device
-            if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-                // Use WhatsApp app URL scheme for mobile
-                shareUrl = `whatsapp://send?text=${text} ${url}`;
-            } else {
-                // Use web.whatsapp.com for desktop
-                shareUrl = `https://web.whatsapp.com/send?text=${text} ${url}`;
-            }
+            // Use the API URL for both mobile and desktop
+            shareUrl = `https://api.whatsapp.com/send?text=${text} ${url}`;
             break;
     }
 
     // Open the share URL in a new window/tab
     window.open(shareUrl, '_blank');
 }
+
 
         function toggleRecording() {
     if (!audioContext) {
