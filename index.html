@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Radio Player</title>
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.6.8/plyr.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script type="text/javascript" src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(45deg, #8E2DE2, #4A00E0);
+        }
+        .player-container {
+            width: 340px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 25px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            padding: 30px;
+        }
+        .station-info {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .station-name {
+            font-size: 32px;
+            font-weight: 700;
+            color: #FFD700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .now-playing {
+            font-size: 18px;
+            color: #FFA500;
+            font-weight: 400;
+        }
+        .plyr--audio .plyr__controls {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 20px;
+        }
+        .plyr--audio .plyr__control {
+            color: #FFD700;
+        }
+        .plyr--audio .plyr__control:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .plyr--audio .plyr__control[aria-expanded=true] {
+            background: rgba(255, 255, 255, 0.3);
+            color: #FFD700;
+        }
+        .plyr--full-ui input[type=range] {
+            color: #FFA500;
+        }
+        .plyr__progress input[type=range], .plyr__progress__buffer {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .plyr--full-ui input[type=range]::-webkit-slider-thumb {
+            background: #FFD700;
+        }
+        .plyr--full-ui input[type=range]:active::-webkit-slider-thumb {
+            background: #FFA500;
+        }
+        .plyr__time {
+            color: #FFD700;
+        }
+        .download-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-top: 20px;
+            background: linear-gradient(45deg, #FFA500, #FFD700);
+            border: none;
+            border-radius: 50px;
+            color: #4A00E0;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .download-btn:hover {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 165, 0, 0.4);
+        }
+        #equalizer {
+            width: 100%;
+            height: 50px;
+            margin-top: 20px;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .control-btn {
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 5px;
+            color: #FFD700;
+            cursor: pointer;
+        }
+        .social-share {
+            margin-top: 20px;
+        }
+        .social-btn {
+            margin-right: 10px;
+            font-size: 20px;
+            color: #FFD700;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="player-container">
+        <div class="station-info">
+            <div class="station-name">Neon Beats FM</div>
+            <div class="now-playing">Now Playing: Live Stream</div>
+        </div>
+        <audio id="player" crossorigin="anonymous">
+            <source src="https://s3.free-shoutcast.com/stream/18086" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+        <button id="recordButton" class="download-btn" onclick="toggleRecording()">
+            <i class="fas fa-record-vinyl"></i> Start Recording
+        </button>
+        <canvas id="equalizer"></canvas>
+        <div class="controls">
+            <button class="control-btn" onclick="setSleepTimer()"><i class="fas fa-clock"></i> Sleep Timer</button>
+            <button class="control-btn" onclick="setAlarm()"><i class="fas fa-alarm-clock"></i> Set Alarm</button>
+            <button class="control-btn" id="castButton"><i class="fas fa-cast"></i> Cast</button>
+        </div>
+        <div class="social-share">
+            <i class="fab fa-facebook social-btn" onclick="share('facebook')"></i>
+            <i class="fab fa-twitter social-btn" onclick="share('twitter')"></i>
+            <i class="fab fa-whatsapp social-btn" onclick="share('whatsapp')"></i>
+        </div>
+    </div>
+
+    <script src="https://cdn.plyr.io/3.6.8/plyr.polyfilled.js"></script>
+    <script>
+        let player;
+        let audioContext;
+        let analyser;
+        let sleepTimerID;
+        let alarmTimerID;
+        let mediaRecorder;
+        let recordedChunks = [];
+        let isRecording = false;
+        let sourceNode;
+        let destinationNode;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const audioElement = document.getElementById('player');
+            player = new Plyr(audioElement, {
+                controls: ['play', 'progress', 'current-time', 'mute', 'volume']
+            });
+
+            player.on('ready', () => {
+                setupAudioContext();
+                setupEqualizer();
+                setupChromecast();
+            });
+
+            player.on('play', () => {
+                audioElement.play().catch(e => console.error("Playback failed:", e));
+            });
+        });
+
+        function setupAudioContext() {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            analyser = audioContext.createAnalyser();
+            sourceNode = audioContext.createMediaElementSource(document.getElementById('player'));
+            destinationNode = audioContext.createMediaStreamDestination();
+            sourceNode.connect(analyser);
+            sourceNode.connect(destinationNode);
+            analyser.connect(audioContext.destination);
+        }
+
+        function setupEqualizer() {
+            const canvas = document.getElementById('equalizer');
+            const ctx = canvas.getContext('2d');
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+
+            function draw() {
+                requestAnimationFrame(draw);
+                analyser.getByteFrequencyData(dataArray);
+                ctx.fillStyle = 'rgb(0, 0, 0)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                const barWidth = (canvas.width / bufferLength) * 2.5;
+                let x = 0;
+
+                for(let i = 0; i < bufferLength; i++) {
+                    const barHeight = dataArray[i] / 2;
+                    ctx.fillStyle = `rgb(${barHeight + 100}, 50, 50)`;
+                    ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+                    x += barWidth + 1;
+                }
+            }
+            draw();
+        }
+
+        function setSleepTimer() {
+            const minutes = prompt("Enter sleep timer duration in minutes:", "30");
+            if (minutes) {
+                clearTimeout(sleepTimerID);
+                sleepTimerID = setTimeout(() => {
+                    player.pause();
+                    alert("Sleep timer ended. Playback stopped.");
+                }, minutes * 60 * 1000);
+                alert(`Sleep timer set for ${minutes} minutes.`);
+            }
+        }
+
+        function setAlarm() {
+            const time = prompt("Enter alarm time (HH:MM):", "07:00");
+            if (time) {
+                const [hours, minutes] = time.split(':');
+                const alarmTime = new Date();
+                alarmTime.setHours(hours);
+                alarmTime.setMinutes(minutes);
+                alarmTime.setSeconds(0);
+                
+                const now = new Date();
+                let timeUntilAlarm = alarmTime - now;
+                if (timeUntilAlarm < 0) {
+                    timeUntilAlarm += 24 * 60 * 60 * 1000; // Add a day if the time has passed
+                }
+                
+                clearTimeout(alarmTimerID);
+                alarmTimerID = setTimeout(() => {
+                    player.play();
+                    alert("Alarm! Your radio is now playing.");
+                }, timeUntilAlarm);
+                
+                alert(`Alarm set for ${time}.`);
+            }
+        }
+
+        function setupChromecast() {
+            window['__onGCastApiAvailable'] = function(isAvailable) {
+                if (isAvailable) {
+                    initializeCastApi();
+                }
+            };
+
+            function initializeCastApi() {
+                cast.framework.CastContext.getInstance().setOptions({
+                    receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+                    autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
+                });
+
+                const castButton = document.getElementById('castButton');
+                castButton.addEventListener('click', () => {
+                    const castSession = cast.framework.CastContext.getInstance().getCurrentSession();
+                    if (castSession) {
+                        const mediaInfo = new chrome.cast.media.MediaInfo(player.source, 'audio/mpeg');
+                        const request = new chrome.cast.media.LoadRequest(mediaInfo);
+                        castSession.loadMedia(request).then(
+                            () => console.log('Cast media loaded'),
+                            error => console.error('Error loading media', error)
+                        );
+                    } else {
+                        cast.framework.CastContext.getInstance().requestSession();
+                    }
+                });
+            }
+        }
+
+        function share(platform) {
+            const url = encodeURIComponent(window.location.href);
+            const text = encodeURIComponent("Check out this awesome radio station!");
+            let shareUrl;
+
+            switch(platform) {
+                case 'facebook':
+                    shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+                    break;
+                case 'twitter':
+                    shareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
+                    break;
+                case 'whatsapp':
+                    shareUrl = `https://wa.me/?text=${text} ${url}`;
+                    break;
+            }
+
+            window.open(shareUrl, '_blank');
+        }
+
+        function toggleRecording() {
+            if (!isRecording) {
+                startRecording();
+            } else {
+                stopRecording();
+            }
+        }
+
+        function startRecording() {
+            if (!mediaRecorder) {
+                mediaRecorder = new MediaRecorder(destinationNode.stream);
+                mediaRecorder.ondataavailable = event => {
+                    if (event.data.size > 0) {
+                        recordedChunks.push(event.data);
+                    }
+                };
+                mediaRecorder.onstop = saveRecording;
+            }
+
+            mediaRecorder.start();
+            isRecording = true;
+            document.getElementById('recordButton').innerHTML = '<i class="fas fa-stop-circle"></i> Stop Recording';
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+                isRecording = false;
+                document.getElementById('recordButton').innerHTML = '<i class="fas fa-record-vinyl"></i> Start Recording';
+            }
+        }
+
+        function saveRecording() {
+            const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            document.body.appendChild(a);
+            a.style = 'display: none';
+            a.href = url;
+            a.download = 'radio_recording.webm';
+            a.click();
+            window.URL.revokeObjectURL(url);
+            recordedChunks = [];
+        }
+    </script>
+</body>
+</html>
