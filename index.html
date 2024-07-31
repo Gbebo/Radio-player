@@ -192,6 +192,7 @@
         let sourceNode;
         let destinationNode;
         let streamCheckTimeout;
+
 document.addEventListener('DOMContentLoaded', function() {
     const audioElement = document.getElementById('player');
     const streamStatus = document.getElementById('streamStatus');
@@ -204,36 +205,90 @@ document.addEventListener('DOMContentLoaded', function() {
         player.elements.buttons.play[0].addEventListener('click', handlePlayClick);
     });
 
+    player.on('play', () => {
+        if (audioContext && audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
+    });
+
+    player.on('pause', () => {
+        // Ensure the audio element is actually paused
+        audioElement.pause();
+    });
+
     audioElement.addEventListener('playing', () => {
         clearTimeout(streamCheckTimeout);
         hideStreamStatus();
+        if (!audioContext) {
+            setupAudioContext();
+        }
     });
 
     audioElement.addEventListener('error', (e) => {
         console.error("Audio error:", e);
         showStreamStatus("No program available now. Please try again later.");
     });
+
+    // Setup equalizer
+    setupEqualizer();
 });
 
 function handlePlayClick() {
     const audioElement = document.getElementById('player');
     
-    // Clear any existing timeout
     clearTimeout(streamCheckTimeout);
-    
-    // Hide any existing status message
     hideStreamStatus();
     
-    // Start playing
-    audioElement.play().catch(e => console.error("Playback failed:", e));
+    if (player.paused) {
+        player.play().catch(e => console.error("Playback failed:", e));
+        
+        streamCheckTimeout = setTimeout(() => {
+            if (audioElement.paused || audioElement.currentTime === 0) {
+                showStreamStatus("No program available now. Please try again later.");
+                player.pause();
+            }
+        }, 2000);
+    } else {
+        player.pause();
+    }
+}
+
+function setupAudioContext() {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = audioContext.createAnalyser();
+    sourceNode = audioContext.createMediaElementSource(document.getElementById('player'));
+    sourceNode.connect(analyser);
+    analyser.connect(audioContext.destination);
+}
+
+function setupEqualizer() {
+    const canvas = document.getElementById('equalizer');
+    const ctx = canvas.getContext('2d');
     
-    // Set a timeout to check if the stream is playing after 2 seconds
-    streamCheckTimeout = setTimeout(() => {
-        if (audioElement.paused || audioElement.currentTime === 0) {
-            showStreamStatus("No program available now. Please try again later.");
-            player.pause();
+    function drawEqualizer() {
+        requestAnimationFrame(drawEqualizer);
+        
+        if (!analyser) return;
+
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+        analyser.getByteFrequencyData(dataArray);
+        
+        ctx.fillStyle = 'rgb(0, 0, 0)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const barWidth = (canvas.width / bufferLength) * 2.5;
+        let x = 0;
+
+        for(let i = 0; i < bufferLength; i++) {
+            const barHeight = dataArray[i] / 2;
+            ctx.fillStyle = `rgb(${barHeight + 100}, 50, 50)`;
+            ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+            x += barWidth + 1;
         }
-    }, 2000);
+    }
+    
+    drawEqualizer();
 }
 
 function showStreamStatus(message) {
@@ -246,6 +301,7 @@ function hideStreamStatus() {
     const streamStatus = document.getElementById('streamStatus');
     streamStatus.style.display = 'none';
 }
+
 function initializeAudioOnce() {
     if (!audioContext) {
         setupAudioContext();
