@@ -162,31 +162,45 @@
         let destinationNode;
 
         document.addEventListener('DOMContentLoaded', function() {
-            const audioElement = document.getElementById('player');
-            player = new Plyr(audioElement, {
-                controls: ['play', 'progress', 'current-time', 'mute', 'volume']
-            });
+    const audioElement = document.getElementById('player');
+    player = new Plyr(audioElement, {
+        controls: ['play', 'progress', 'current-time', 'mute', 'volume']
+    });
 
-            player.on('ready', () => {
-                setupAudioContext();
-                setupEqualizer();
-                setupChromecast();
-            });
+    player.on('ready', () => {
+        // We'll set up audio context after user interaction
+        player.elements.buttons.play[0].addEventListener('click', initializeAudioOnce);
+    });
 
-            player.on('play', () => {
-                audioElement.play().catch(e => console.error("Playback failed:", e));
-            });
-        });
-
-        function setupAudioContext() {
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            analyser = audioContext.createAnalyser();
-            sourceNode = audioContext.createMediaElementSource(document.getElementById('player'));
-            destinationNode = audioContext.createMediaStreamDestination();
-            sourceNode.connect(analyser);
-            sourceNode.connect(destinationNode);
-            analyser.connect(audioContext.destination);
+    player.on('play', () => {
+        if (audioContext && audioContext.state === 'suspended') {
+            audioContext.resume();
         }
+        audioElement.play().catch(e => console.error("Playback failed:", e));
+    });
+});
+
+function initializeAudioOnce() {
+    if (!audioContext) {
+        setupAudioContext();
+        setupEqualizer();
+        setupChromecast();
+    }
+    // Remove the event listener after first click
+    player.elements.buttons.play[0].removeEventListener('click', initializeAudioOnce);
+}
+
+
+function setupAudioContext() {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = audioContext.createAnalyser();
+    sourceNode = audioContext.createMediaElementSource(document.getElementById('player'));
+    destinationNode = audioContext.createMediaStreamDestination();
+    sourceNode.connect(analyser);
+    sourceNode.connect(destinationNode);
+    analyser.connect(audioContext.destination);
+}
+
 
         function setupEqualizer() {
             const canvas = document.getElementById('equalizer');
@@ -301,12 +315,16 @@
         }
 
         function toggleRecording() {
-            if (!isRecording) {
-                startRecording();
-            } else {
-                stopRecording();
-            }
-        }
+    if (!audioContext) {
+        initializeAudioOnce();
+    }
+    if (!isRecording) {
+        startRecording();
+    } else {
+        stopRecording();
+    }
+}
+
 
         function startRecording() {
             if (!mediaRecorder) {
