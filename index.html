@@ -191,7 +191,7 @@
         let isRecording = false;
         let sourceNode;
         let destinationNode;
-        
+        let streamCheckTimeout;
 document.addEventListener('DOMContentLoaded', function() {
     const audioElement = document.getElementById('player');
     const streamStatus = document.getElementById('streamStatus');
@@ -201,37 +201,45 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     player.on('ready', () => {
-        player.elements.buttons.play[0].addEventListener('click', initializeAudioOnce);
+        player.elements.buttons.play[0].addEventListener('click', handlePlayClick);
     });
 
-    player.on('play', () => {
-        if (audioContext && audioContext.state === 'suspended') {
-            audioContext.resume();
-        }
-        audioElement.play().catch(e => {
-            console.error("Playback failed:", e);
-            showStreamStatus("No program available now. Please try again later.");
-        });
+    audioElement.addEventListener('playing', () => {
+        clearTimeout(streamCheckTimeout);
+        hideStreamStatus();
     });
 
     audioElement.addEventListener('error', (e) => {
         console.error("Audio error:", e);
         showStreamStatus("No program available now. Please try again later.");
     });
-
-    // Add timeupdate event listener to hide the message if stream starts playing
-    audioElement.addEventListener('timeupdate', () => {
-        if (!audioElement.paused) {
-            hideStreamStatus();
-        }
-    });
 });
+
+function handlePlayClick() {
+    const audioElement = document.getElementById('player');
+    
+    // Clear any existing timeout
+    clearTimeout(streamCheckTimeout);
+    
+    // Hide any existing status message
+    hideStreamStatus();
+    
+    // Start playing
+    audioElement.play().catch(e => console.error("Playback failed:", e));
+    
+    // Set a timeout to check if the stream is playing after 2 seconds
+    streamCheckTimeout = setTimeout(() => {
+        if (audioElement.paused || audioElement.currentTime === 0) {
+            showStreamStatus("No program available now. Please try again later.");
+            player.pause();
+        }
+    }, 2000);
+}
 
 function showStreamStatus(message) {
     const streamStatus = document.getElementById('streamStatus');
     streamStatus.textContent = message;
     streamStatus.style.display = 'block';
-    player.pause(); // Pause the player when there's an error
 }
 
 function hideStreamStatus() {
