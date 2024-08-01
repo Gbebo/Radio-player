@@ -9,17 +9,24 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script type="text/javascript" src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
     <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
         body {
             font-family: 'Montserrat', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
             background: linear-gradient(45deg, #8E2DE2, #4A00E0);
+            padding: 20px;
         }
         .player-container {
-            width: 340px;
+            width: 100%;
+            max-width: 340px;
             background: rgba(255, 255, 255, 0.15);
             border-radius: 25px;
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
@@ -33,21 +40,21 @@
             margin-bottom: 25px;
         }
         .station-name {
-            font-size: 32px;
+            font-size: 28px;
             font-weight: 700;
             color: #FFD700;
             margin-bottom: 10px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
         .now-playing {
-            font-size: 18px;
+            font-size: 16px;
             color: #FFA500;
             font-weight: 400;
         }
         .plyr--audio .plyr__controls {
             background: rgba(255, 255, 255, 0.1);
             border-radius: 20px;
-            padding: 20px;
+            padding: 15px;
         }
         .plyr--audio .plyr__control {
             color: #FFD700;
@@ -113,12 +120,76 @@
         }
         .social-share {
             margin-top: 20px;
+            text-align: center;
         }
         .social-btn {
-            margin-right: 10px;
+            margin: 0 5px;
             font-size: 20px;
             color: #FFD700;
             cursor: pointer;
+        }
+
+        @media screen and (min-width: 768px) {
+            .player-container {
+                max-width: 500px;
+                padding: 40px;
+            }
+            .station-name {
+                font-size: 32px;
+            }
+            .now-playing {
+                font-size: 18px;
+            }
+            .controls {
+                justify-content: space-around;
+            }
+        }
+
+        @media screen and (min-width: 1024px) {
+            .player-container {
+                max-width: 600px;
+            }
+        }
+
+        @media (orientation: landscape) and (max-height: 500px) {
+            body {
+                align-items: flex-start;
+            }
+            .player-container {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: space-between;
+                align-items: center;
+                max-width: 90%;
+            }
+            .station-info {
+                width: 100%;
+                order: 1;
+                margin-bottom: 15px;
+            }
+            .plyr--audio {
+                width: 48%;
+                order: 2;
+            }
+            #equalizer {
+                width: 48%;
+                order: 3;
+                margin-top: 0;
+            }
+            .download-btn {
+                width: 100%;
+                order: 4;
+            }
+            .controls {
+                width: 100%;
+                order: 5;
+                margin-top: 15px;
+            }
+            .social-share {
+                width: 100%;
+                order: 6;
+                margin-top: 15px;
+            }
         }
     </style>
 </head>
