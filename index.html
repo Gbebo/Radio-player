@@ -374,25 +374,46 @@ function setupChromecast() {
 }
 
 function share(platform) {
-    const url = encodeURIComponent(window.location.href);
-    const text = encodeURIComponent("Check out this awesome radio station!");
-    let shareUrl;
+        const url = encodeURIComponent(window.location.href);
+        const text = encodeURIComponent("Check out this awesome radio station!");
+        let shareUrl;
 
-    switch(platform) {
-        case 'facebook':
-            shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
-            break;
-        case 'twitter':
-            shareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
-            break;
-        case 'whatsapp':
-            shareUrl = `https://wa.me/?text=${text} ${url}`;
-            break;
+        switch(platform) {
+            case 'facebook':
+                shareUrl = `fb://share/?u=${url}`;
+                break;
+            case 'twitter':
+                shareUrl = `twitter://post?text=${text}&url=${url}`;
+                break;
+            case 'whatsapp':
+                shareUrl = `whatsapp://send?text=${text} ${url}`;
+                break;
+        }
+
+        // Try to open the app
+        window.location.href = shareUrl;
+
+        // If the app doesn't open within a second, fall back to web URL
+        setTimeout(() => {
+            if (document.hidden) {
+                // The app was likely opened, do nothing
+                return;
+            }
+
+            // Fall back to web URL
+            switch(platform) {
+                case 'facebook':
+                    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+                    break;
+                case 'twitter':
+                    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+                    break;
+                case 'whatsapp':
+                    window.open(`https://web.whatsapp.com/send?text=${text} ${url}`, '_blank');
+                    break;
+            }
+        }, 1000);
     }
-
-    window.open(shareUrl, '_blank');
-}
-
 function toggleRecording() {
     if (!audioContext) {
         initializeAudioOnce();
