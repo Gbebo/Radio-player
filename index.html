@@ -388,9 +388,10 @@ function share(platform) {
                 webUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
                 break;
             case 'whatsapp':
-                intentUrl = `intent://send?text=${text} ${url}#Intent;scheme=whatsapp;package=com.whatsapp;end`;
-                webUrl = `https://api.whatsapp.com/send?text=${text} ${url}`;
+                
+                shareUrl = `https://wa.me/?text=${text} ${url}`;
                 break;
+                
         }
 
         // Check if it's an Android device
