@@ -196,15 +196,15 @@
 <body>
     <div class="player-container">
         <div class="station-info">
-            <div class="station-name">Power of Prayer FM</div>
+            <div class="station-name">Neon Beats FM</div>
             <div class="now-playing">Now Playing: Live Stream</div>
         </div>
         <audio id="player" crossorigin="anonymous">
             <source src="https://s3.free-shoutcast.com/stream/18086" type="audio/mpeg">
             Your browser does not support the audio element.
         </audio>
-        <button id="recordButton" class="download-btn" onclick="toggleRecording()">
-            <i class="fas fa-record-vinyl"></i> Start Recording
+        <button id="recordButton" class="download-btn" onclick="toggleRecording()" disabled>
+            <i class="fas fa-record-vinyl"></i> Recording Unavailable
         </button>
         <canvas id="equalizer"></canvas>
         <div class="controls">
@@ -221,25 +221,25 @@
 
     <script src="https://cdn.plyr.io/3.6.8/plyr.polyfilled.js"></script>
     <script>
-        let player;
-        let audioContext;
-        let analyser;
-        let sleepTimerID;
-        let alarmTimerID;
-        let mediaRecorder;
-        let recordedChunks = [];
-        let isRecording = false;
-        let sourceNode;
-        let destinationNode;
+       let player;
+let audioContext;
+let analyser;
+let sleepTimerID;
+let alarmTimerID;
+let mediaRecorder;
+let recordedChunks = [];
+let isRecording = false;
+let sourceNode;
+let destinationNode;
+let isStreamActive = false;
 
-        document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function() {
     const audioElement = document.getElementById('player');
     player = new Plyr(audioElement, {
         controls: ['play', 'progress', 'current-time', 'mute', 'volume']
     });
 
     player.on('ready', () => {
-        // We'll set up audio context after user interaction
         player.elements.buttons.play[0].addEventListener('click', initializeAudioOnce);
     });
 
@@ -248,7 +248,18 @@
             audioContext.resume();
         }
         audioElement.play().catch(e => console.error("Playback failed:", e));
+        checkLiveStream();
     });
+
+    player.on('pause', () => {
+        checkLiveStream();
+    });
+
+    // Check for live stream every 5 seconds
+    setInterval(checkLiveStream, 5000);
+
+    // Initialize record button state
+    updateRecordButtonState();
 });
 
 function initializeAudioOnce() {
@@ -257,10 +268,8 @@ function initializeAudioOnce() {
         setupEqualizer();
         setupChromecast();
     }
-    // Remove the event listener after first click
     player.elements.buttons.play[0].removeEventListener('click', initializeAudioOnce);
 }
-
 
 function setupAudioContext() {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -272,122 +281,125 @@ function setupAudioContext() {
     analyser.connect(audioContext.destination);
 }
 
+function setupEqualizer() {
+    const canvas = document.getElementById('equalizer');
+    const ctx = canvas.getContext('2d');
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
 
-        function setupEqualizer() {
-            const canvas = document.getElementById('equalizer');
-            const ctx = canvas.getContext('2d');
-            const bufferLength = analyser.frequencyBinCount;
-            const dataArray = new Uint8Array(bufferLength);
+    function draw() {
+        requestAnimationFrame(draw);
+        analyser.getByteFrequencyData(dataArray);
+        ctx.fillStyle = 'rgb(0, 0, 0)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            function draw() {
-                requestAnimationFrame(draw);
-                analyser.getByteFrequencyData(dataArray);
-                ctx.fillStyle = 'rgb(0, 0, 0)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
+        const barWidth = (canvas.width / bufferLength) * 2.5;
+        let x = 0;
 
-                const barWidth = (canvas.width / bufferLength) * 2.5;
-                let x = 0;
-
-                for(let i = 0; i < bufferLength; i++) {
-                    const barHeight = dataArray[i] / 2;
-                    ctx.fillStyle = `rgb(${barHeight + 100}, 50, 50)`;
-                    ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-                    x += barWidth + 1;
-                }
-            }
-            draw();
+        for(let i = 0; i < bufferLength; i++) {
+            const barHeight = dataArray[i] / 2;
+            ctx.fillStyle = `rgb(${barHeight + 100}, 50, 50)`;
+            ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+            x += barWidth + 1;
         }
+    }
+    draw();
+}
 
-        function setSleepTimer() {
-            const minutes = prompt("Enter sleep timer duration in minutes:", "30");
-            if (minutes) {
-                clearTimeout(sleepTimerID);
-                sleepTimerID = setTimeout(() => {
-                    player.pause();
-                    alert("Sleep timer ended. Playback stopped.");
-                }, minutes * 60 * 1000);
-                alert(`Sleep timer set for ${minutes} minutes.`);
-            }
+function setSleepTimer() {
+    const minutes = prompt("Enter sleep timer duration in minutes:", "30");
+    if (minutes) {
+        clearTimeout(sleepTimerID);
+        sleepTimerID = setTimeout(() => {
+            player.pause();
+            alert("Sleep timer ended. Playback stopped.");
+        }, minutes * 60 * 1000);
+        alert(`Sleep timer set for ${minutes} minutes.`);
+    }
+}
+
+function setAlarm() {
+    const time = prompt("Enter alarm time (HH:MM):", "07:00");
+    if (time) {
+        const [hours, minutes] = time.split(':');
+        const alarmTime = new Date();
+        alarmTime.setHours(hours);
+        alarmTime.setMinutes(minutes);
+        alarmTime.setSeconds(0);
+        
+        const now = new Date();
+        let timeUntilAlarm = alarmTime - now;
+        if (timeUntilAlarm < 0) {
+            timeUntilAlarm += 24 * 60 * 60 * 1000; // Add a day if the time has passed
         }
+        
+        clearTimeout(alarmTimerID);
+        alarmTimerID = setTimeout(() => {
+            player.play();
+            alert("Alarm! Your radio is now playing.");
+        }, timeUntilAlarm);
+        
+        alert(`Alarm set for ${time}.`);
+    }
+}
 
-        function setAlarm() {
-            const time = prompt("Enter alarm time (HH:MM):", "07:00");
-            if (time) {
-                const [hours, minutes] = time.split(':');
-                const alarmTime = new Date();
-                alarmTime.setHours(hours);
-                alarmTime.setMinutes(minutes);
-                alarmTime.setSeconds(0);
-                
-                const now = new Date();
-                let timeUntilAlarm = alarmTime - now;
-                if (timeUntilAlarm < 0) {
-                    timeUntilAlarm += 24 * 60 * 60 * 1000; // Add a day if the time has passed
-                }
-                
-                clearTimeout(alarmTimerID);
-                alarmTimerID = setTimeout(() => {
-                    player.play();
-                    alert("Alarm! Your radio is now playing.");
-                }, timeUntilAlarm);
-                
-                alert(`Alarm set for ${time}.`);
-            }
+function setupChromecast() {
+    window['__onGCastApiAvailable'] = function(isAvailable) {
+        if (isAvailable) {
+            initializeCastApi();
         }
+    };
 
-        function setupChromecast() {
-            window['__onGCastApiAvailable'] = function(isAvailable) {
-                if (isAvailable) {
-                    initializeCastApi();
-                }
-            };
+    function initializeCastApi() {
+        cast.framework.CastContext.getInstance().setOptions({
+            receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+            autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
+        });
 
-            function initializeCastApi() {
-                cast.framework.CastContext.getInstance().setOptions({
-                    receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
-                    autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
-                });
-
-                const castButton = document.getElementById('castButton');
-                castButton.addEventListener('click', () => {
-                    const castSession = cast.framework.CastContext.getInstance().getCurrentSession();
-                    if (castSession) {
-                        const mediaInfo = new chrome.cast.media.MediaInfo(player.source, 'audio/mpeg');
-                        const request = new chrome.cast.media.LoadRequest(mediaInfo);
-                        castSession.loadMedia(request).then(
-                            () => console.log('Cast media loaded'),
-                            error => console.error('Error loading media', error)
-                        );
-                    } else {
-                        cast.framework.CastContext.getInstance().requestSession();
-                    }
-                });
+        const castButton = document.getElementById('castButton');
+        castButton.addEventListener('click', () => {
+            const castSession = cast.framework.CastContext.getInstance().getCurrentSession();
+            if (castSession) {
+                const mediaInfo = new chrome.cast.media.MediaInfo(player.source, 'audio/mpeg');
+                const request = new chrome.cast.media.LoadRequest(mediaInfo);
+                castSession.loadMedia(request).then(
+                    () => console.log('Cast media loaded'),
+                    error => console.error('Error loading media', error)
+                );
+            } else {
+                cast.framework.CastContext.getInstance().requestSession();
             }
-        }
+        });
+    }
+}
 
-        function share(platform) {
-            const url = encodeURIComponent(window.location.href);
-            const text = encodeURIComponent("Check out this awesome radio station!");
-            let shareUrl;
+function share(platform) {
+    const url = encodeURIComponent(window.location.href);
+    const text = encodeURIComponent("Check out this awesome radio station!");
+    let shareUrl;
 
-            switch(platform) {
-                case 'facebook':
-                    shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
-                    break;
-                case 'twitter':
-                    shareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
-                    break;
-                case 'whatsapp':
-                    shareUrl = `https://wa.me/?text=${text} ${url}`;
-                    break;
-            }
+    switch(platform) {
+        case 'facebook':
+            shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+            break;
+        case 'twitter':
+            shareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
+            break;
+        case 'whatsapp':
+            shareUrl = `https://wa.me/?text=${text} ${url}`;
+            break;
+    }
 
-            window.open(shareUrl, '_blank');
-        }
+    window.open(shareUrl, '_blank');
+}
 
-        function toggleRecording() {
+function toggleRecording() {
     if (!audioContext) {
         initializeAudioOnce();
+    }
+    if (!isStreamActive) {
+        alert("Cannot record. No active stream.");
+        return;
     }
     if (!isRecording) {
         startRecording();
@@ -396,43 +408,76 @@ function setupAudioContext() {
     }
 }
 
+function startRecording() {
+        if (!mediaRecorder) {
+            mediaRecorder = new MediaRecorder(destinationNode.stream);
+            mediaRecorder.ondataavailable = event => {
+                if (event.data.size > 0) {
+                    recordedChunks.push(event.data);
+                }
+            };
+            mediaRecorder.onstop = saveRecording;
+        }
 
-        function startRecording() {
-            if (!mediaRecorder) {
-                mediaRecorder = new MediaRecorder(destinationNode.stream);
-                mediaRecorder.ondataavailable = event => {
-                    if (event.data.size > 0) {
-                        recordedChunks.push(event.data);
-                    }
-                };
-                mediaRecorder.onstop = saveRecording;
+        mediaRecorder.start();
+        isRecording = true;
+        updateRecordButtonState();
+    }
+
+    function stopRecording() {
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            mediaRecorder.stop();
+            isRecording = false;
+            updateRecordButtonState();
+        }
+    }
+
+    function saveRecording() {
+        const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        document.body.appendChild(a);
+        a.style = 'display: none';
+        a.href = url;
+        a.download = 'radio_recording.webm';
+        a.click();
+        window.URL.revokeObjectURL(url);
+        recordedChunks = [];
+    }
+
+    function updateRecordButtonState() {
+        const recordButton = document.getElementById('recordButton');
+        if (isStreamActive) {
+            recordButton.disabled = false;
+            if (isRecording) {
+                recordButton.innerHTML = '<i class="fas fa-stop-circle"></i> Stop Recording';
+            } else {
+                recordButton.innerHTML = '<i class="fas fa-record-vinyl"></i> Start Recording';
             }
-
-            mediaRecorder.start();
-            isRecording = true;
-            document.getElementById('recordButton').innerHTML = '<i class="fas fa-stop-circle"></i> Stop Recording';
+        } else {
+            recordButton.disabled = true;
+            recordButton.innerHTML = '<i class="fas fa-record-vinyl"></i> Recording Unavailable';
         }
+    }
 
-        function stopRecording() {
-            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-                mediaRecorder.stop();
-                isRecording = false;
-                document.getElementById('recordButton').innerHTML = '<i class="fas fa-record-vinyl"></i> Start Recording';
+    function checkLiveStream() {
+        const nowPlayingElement = document.querySelector('.now-playing');
+        // This is still a simplified check. In a real-world scenario, you'd want to
+        // implement a more robust method to detect if the stream is live.
+        isStreamActive = player.playing;
+        
+        if (isStreamActive) {
+            nowPlayingElement.textContent = "Now Playing: Live Stream";
+            nowPlayingElement.classList.add('live');
+        } else {
+            nowPlayingElement.textContent = "Stream Offline";
+            nowPlayingElement.classList.remove('live');
+            if (isRecording) {
+                stopRecording();
             }
         }
-
-        function saveRecording() {
-            const blob = new Blob(recordedChunks, { type: 'audio/webm' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            document.body.appendChild(a);
-            a.style = 'display: none';
-            a.href = url;
-            a.download = 'radio_recording.webm';
-            a.click();
-            window.URL.revokeObjectURL(url);
-            recordedChunks = [];
-        }
-    </script>
+        updateRecordButtonState();
+    }
+</script>
 </body>
 </html>
