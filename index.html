@@ -376,44 +376,45 @@ function setupChromecast() {
 function share(platform) {
         const url = encodeURIComponent(window.location.href);
         const text = encodeURIComponent("Check out this awesome radio station!");
-        let shareUrl;
+        let intentUrl, webUrl;
 
         switch(platform) {
             case 'facebook':
-                shareUrl = `fb://share/?u=${url}`;
+                intentUrl = `intent://www.facebook.com/sharer/sharer.php?u=${url}#Intent;scheme=https;package=com.facebook.katana;end`;
+                webUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
                 break;
             case 'twitter':
-                shareUrl = `twitter://post?text=${text}&url=${url}`;
+                intentUrl = `intent://twitter.com/intent/tweet?text=${text}&url=${url}#Intent;scheme=https;package=com.twitter.android;end`;
+                webUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
                 break;
             case 'whatsapp':
-                shareUrl = `whatsapp://send?text=${text} ${url}`;
+                intentUrl = `intent://send?text=${text} ${url}#Intent;scheme=whatsapp;package=com.whatsapp;end`;
+                webUrl = `https://api.whatsapp.com/send?text=${text} ${url}`;
                 break;
         }
 
-        // Try to open the app
-        window.location.href = shareUrl;
+        // Check if it's an Android device
+        if (/Android/i.test(navigator.userAgent)) {
+            window.location.href = intentUrl;
+        } 
+        // Check if it's an iOS device
+        else if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+            window.location.href = webUrl;
+        } 
+        // For all other devices, open in a new tab
+        else {
+            window.open(webUrl, '_blank');
+        }
 
-        // If the app doesn't open within a second, fall back to web URL
+        // Fallback for mobile devices if the app doesn't open
         setTimeout(() => {
             if (document.hidden) {
-                // The app was likely opened, do nothing
                 return;
             }
-
-            // Fall back to web URL
-            switch(platform) {
-                case 'facebook':
-                    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
-                    break;
-                case 'twitter':
-                    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
-                    break;
-                case 'whatsapp':
-                    window.open(`https://web.whatsapp.com/send?text=${text} ${url}`, '_blank');
-                    break;
-            }
-        }, 1000);
+            window.location.href = webUrl;
+        }, 2000);
     }
+        
 function toggleRecording() {
     if (!audioContext) {
         initializeAudioOnce();
