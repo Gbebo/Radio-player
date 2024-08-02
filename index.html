@@ -128,6 +128,12 @@
             color: #FFD700;
             cursor: pointer;
         }
+        .countdown {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 18px;
+            color: #FFD700;
+        }
 
         @media screen and (min-width: 768px) {
             .player-container {
@@ -190,36 +196,19 @@
                 order: 6;
                 margin-top: 15px;
             }
-        }
-        #next-show-countdown {
-            text-align: center;
-            font-size: 16px;
-            color: #FFD700;
-            margin-top: 20px;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-        }
-        
-        #next-show-countdown h3 {
-            margin-bottom: 10px;
-        }
-        
-        #countdown {
-            font-size: 24px;
-            font-weight: bold;
+            .countdown {
+                width: 100%;
+                order: 7;
+                margin-top: 15px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="player-container">
         <div class="station-info">
-            <div class="station-name">Neon Beats FM</div>
+            <div class="station-name">Power of Prayer FM</div>
             <div class="now-playing">Now Playing: Live Stream</div>
-        </div>
-        <div id="next-show-countdown">
-            <h3>Next Show</h3>
-            <div id="countdown"></div>
         </div>
         <audio id="player" crossorigin="anonymous">
             <source src="https://s3.free-shoutcast.com/stream/18086" type="audio/mpeg">
@@ -239,6 +228,7 @@
             <i class="fab fa-twitter social-btn" onclick="share('twitter')"></i>
             <i class="fab fa-whatsapp social-btn" onclick="share('whatsapp')"></i>
         </div>
+        <div class="countdown" id="countdown">Next show in: --:--:--</div>
     </div>
 
     <script src="https://cdn.plyr.io/3.6.8/plyr.polyfilled.js"></script>
@@ -254,6 +244,7 @@ let isRecording = false;
 let sourceNode;
 let destinationNode;
 let isStreamActive = false;
+let countdownInterval;
 
 document.addEventListener('DOMContentLoaded', function() {
     const audioElement = document.getElementById('player');
@@ -282,32 +273,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize record button state
     updateRecordButtonState();
+
+    // Initialize countdown
+    updateCountdown();
+    countdownInterval = setInterval(updateCountdown, 1000);
 });
-
-const nextShowTime = new Date("2023-08-05T20:00:00").getTime(); // Example: Next show on August 5, 2023, at 8 PM
-
-        function updateNextShowCountdown() {
-            const now = new Date().getTime();
-            const distance = nextShowTime - now;
-
-            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-            document.getElementById("countdown").innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
-
-            if (distance < 0) {
-                clearInterval(countdownInterval);
-                document.getElementById("countdown").innerHTML = "LIVE NOW!";
-            }
-        }
-
-        // Update the countdown every second
-        const countdownInterval = setInterval(updateNextShowCountdown, 1000);
-
-        // Initial call to set the countdown immediately
-        updateNextShowCountdown();
 
 function initializeAudioOnce() {
     if (!audioContext) {
@@ -456,75 +426,115 @@ function toggleRecording() {
 }
 
 function startRecording() {
-        if (!mediaRecorder) {
-            mediaRecorder = new MediaRecorder(destinationNode.stream);
-            mediaRecorder.ondataavailable = event => {
-                if (event.data.size > 0) {
-                    recordedChunks.push(event.data);
-                }
-            };
-            mediaRecorder.onstop = saveRecording;
-        }
+    if (!mediaRecorder) {
+        mediaRecorder = new MediaRecorder(destinationNode.stream);
+        mediaRecorder.ondataavailable = event => {
+            if (event.data.size > 0) {
+                recordedChunks.push(event.data);
+            }
+        };
+        mediaRecorder.onstop = saveRecording;
+    }
 
-        mediaRecorder.start();
-        isRecording = true;
+    mediaRecorder.start();
+    isRecording = true;
+    updateRecordButtonState();
+}
+
+function stopRecording() {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+        isRecording = false;
         updateRecordButtonState();
     }
+}
 
-    function stopRecording() {
-        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-            mediaRecorder.stop();
-            isRecording = false;
-            updateRecordButtonState();
-        }
-    }
+function saveRecording() {
+    const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    document.body.appendChild(a);
+    a.style = 'display: none';
+    a.href = url;
+    a.download = 'radio_recording.webm';
+    a.click();
+    window.URL.revokeObjectURL(url);
+    recordedChunks = [];
+}
 
-    function saveRecording() {
-        const blob = new Blob(recordedChunks, { type: 'audio/webm' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        document.body.appendChild(a);
-        a.style = 'display: none';
-        a.href = url;
-        a.download = 'radio_recording.webm';
-        a.click();
-        window.URL.revokeObjectURL(url);
-        recordedChunks = [];
-    }
-
-    function updateRecordButtonState() {
-        const recordButton = document.getElementById('recordButton');
-        if (isStreamActive) {
-            recordButton.disabled = false;
-            if (isRecording) {
-                recordButton.innerHTML = '<i class="fas fa-stop-circle"></i> Stop Recording';
-            } else {
-                recordButton.innerHTML = '<i class="fas fa-record-vinyl"></i> Start Recording';
-            }
+function updateRecordButtonState() {
+    const recordButton = document.getElementById('recordButton');
+    if (isStreamActive) {
+        recordButton.disabled = false;
+        if (isRecording) {
+            recordButton.innerHTML = '<i class="fas fa-stop-circle"></i> Stop Recording';
         } else {
-            recordButton.disabled = true;
-            recordButton.innerHTML = '<i class="fas fa-record-vinyl"></i> Recording Unavailable';
+            recordButton.innerHTML = '<i class="fas fa-record-vinyl"></i> Start Recording';
         }
+    } else {
+        recordButton.disabled = true;
+        recordButton.innerHTML = '<i class="fas fa-record-vinyl"></i> Recording Unavailable';
     }
+}
 
-    function checkLiveStream() {
-        const nowPlayingElement = document.querySelector('.now-playing');
-        // This is still a simplified check. In a real-world scenario, you'd want to
-        // implement a more robust method to detect if the stream is live.
-        isStreamActive = player.playing;
-        
-        if (isStreamActive) {
-            nowPlayingElement.textContent = "Now Playing: Live Stream";
-            nowPlayingElement.classList.add('live');
-        } else {
-            nowPlayingElement.textContent = "Stream Offline";
-            nowPlayingElement.classList.remove('live');
-            if (isRecording) {
-                stopRecording();
-            }
+function checkLiveStream() {
+    const nowPlayingElement = document.querySelector('.now-playing');
+    // This is still a simplified check. In a real-world scenario, you'd want to
+    // implement a more robust method to detect if the stream is live.
+    isStreamActive = player.playing;
+    
+    if (isStreamActive) {
+        nowPlayingElement.textContent = "Now Playing: Live Stream";
+        nowPlayingElement.classList.add('live');
+    } else {
+        nowPlayingElement.textContent = "Stream Offline";
+        nowPlayingElement.classList.remove('live');
+        if (isRecording) {
+            stopRecording();
         }
-        updateRecordButtonState();
     }
-</script>
+    updateRecordButtonState();
+}
+
+function getNextAiringTime(currentTime) {
+    // Set the next airing to August 8, 2024 at 20:00 (8 PM)
+    const nextAiring = new Date(2024, 7, 8, 20, 0, 0, 0); // Note: month is 0-indexed, so 7 is August
+    
+    // If the current time is past August 8, 2024 at 20:00, return null or handle as needed
+    if (currentTime > nextAiring) {
+        return null; // or handle this case as appropriate for your application
+    }
+    
+    return nextAiring;
+}
+
+function updateCountdown() {
+    const now = new Date();
+    const nextAiring = getNextAiringTime(now);
+
+    if (nextAiring) {
+        const timeRemaining = nextAiring - now;
+
+        if (timeRemaining > 0) {
+            const days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+
+            document.getElementById('countdown').textContent = `Next show in: ${days}d ${padZero(hours)}:${padZero(minutes)}:${padZero(seconds)}`;
+        } else {
+            document.getElementById('countdown').textContent = "Show is live now!";
+            clearInterval(countdownInterval);
+        }
+    } else {
+        document.getElementById('countdown').textContent = "No upcoming shows scheduled";
+        clearInterval(countdownInterval);
+    }
+}
+
+function padZero(num) {
+    return num.toString().padStart(2, '0');
+}
+    </script>
 </body>
 </html>
