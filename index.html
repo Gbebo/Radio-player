@@ -390,34 +390,25 @@ function setupChromecast() {
     }
 }
 
+const shareUrls = {
+  facebook: `intent://share?url=${url}#Intent;scheme=fb;package=com.facebook.katana;end`,
+  twitter: `intent://tweet?url=${url}&text=${text}#Intent;scheme=twitter;package=com.twitter.android;end`,
+  whatsapp: `intent://send?text=${text} ${url}#Intent;scheme=smsto;package=com.whatsapp;action=android.intent.action.SENDTO;end`,
+};
+
 function share(platform) {
-    const url = encodeURIComponent(window.location.href);
-    const text = encodeURIComponent("Check out this awesome radio station!");
-    let shareUrl;
+  const url = encodeURIComponent(window.location.href);
+  const text = encodeURIComponent("Check out this awesome radio station!");
+  const shareUrl = shareUrls[platform];
 
-    switch(platform) {
-        case 'facebook':
-            // Attempt to open the Facebook app
-            shareUrl = `fb://facewebmodal/f?href=${url}`; 
-            setTimeout(() => {
-                // Fallback to browser if app doesn't open within a short time
-                window.location = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
-            }, 250); // Adjust timeout as needed
-            break;
-        case 'twitter':
-            // Attempt to open the Twitter app
-            shareUrl = `twitter://post?message=${text}%20${url}`;
-            setTimeout(() => {
-                window.location = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
-            }, 250);
-            break;
-        case 'whatsapp':
-            shareUrl = `whatsapp://send?text=${text} ${url}`;
-            break;
-    }
+  if (!shareUrl) {
+    console.error(`Invalid platform: ${platform}`);
+    return;
+  }
 
-    window.location = shareUrl; 
+  window.open(shareUrl, '_blank');
 }
+        
 
 function toggleRecording() {
     if (!audioContext) {
