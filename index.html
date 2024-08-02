@@ -403,7 +403,7 @@ function share(platform) {
             shareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
             break;
         case 'whatsapp':
-            shareUrl = `https://wa.me/?text=${text} ${url}`;
+           shareUrl = `whatsapp://send?text=${text} ${url}`;
             break;
     }
 
