@@ -391,23 +391,57 @@ function setupChromecast() {
 }
 
 function share(platform) {
-    const url = encodeURIComponent(window.location.href);
-    const text = encodeURIComponent("Check out this awesome radio station!");
-    let shareUrl;
+  const url = encodeURIComponent(window.location.href);
+  const text = encodeURIComponent("Check out this awesome radio station!");
 
-    switch(platform) {
-        case 'facebook':
-            shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
-            break;
-        case 'twitter':
-            shareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
-            break;
-        case 'whatsapp':
-           shareUrl = `whatsapp://send?text=${text} ${url}`;
-            break;
+  // Detect if the user is on a mobile device
+  function isMobileDevice() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  }
+
+  if (isMobileDevice()) {
+    // Use platform-specific URL schemes for mobile devices
+    let shareUrl;
+    switch (platform) {
+      case 'facebook':
+        shareUrl = `fb://share?link=${url}`;
+        break;
+      case 'twitter':
+        shareUrl = `twitter://post?message=${text}&url=${url}`;
+        break;
+      case 'whatsapp':
+        shareUrl = `whatsapp://send?text=${text} ${url}`;
+        break;
     }
 
+    // Try to open the platform-specific URL scheme
+    window.location.href = shareUrl;
+  } else {
+    // Use web-based sharing options for desktop devices
+    switch (platform) {
+      case 'facebook':
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+        break;
+      case 'twitter':
+        shareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
+        break;
+      case 'whatsapp':
+        shareUrl = `https://wa.me/?text=${text} ${url}`;
+        break;
+    }
+
+    // Open the web-based sharing URL in a new window/tab
     window.open(shareUrl, '_blank');
+  }
+
+  // Fallback to the Web Sharing API if available
+  if (navigator.share) {
+    navigator.share({
+      title: 'Check out this awesome radio station!',
+      url: window.location.href
+    })
+    .catch(console.error);
+  }
 }
 
 function toggleRecording() {
