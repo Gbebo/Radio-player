@@ -390,26 +390,56 @@ function setupChromecast() {
     }
 }
 
-const shareUrls = {
-  facebook: `intent://share?url=${url}#Intent;scheme=fb;package=com.facebook.katana;end`,
-  twitter: `intent://tweet?url=${url}&text=${text}#Intent;scheme=twitter;package=com.twitter.android;end`,
-  whatsapp: `intent://send?text=${text} ${url}#Intent;scheme=smsto;package=com.whatsapp;action=android.intent.action.SENDTO;end`,
-};
-
 function share(platform) {
-  const url = encodeURIComponent(window.location.href);
-  const text = encodeURIComponent("Check out this awesome radio station!");
-  const shareUrl = shareUrls[platform];
+    const url = window.location.href;
+    const text = "Check out this awesome radio station!";
 
-  if (!shareUrl) {
-    console.error(`Invalid platform: ${platform}`);
-    return;
-  }
+    // Check if Web Share API is supported
+    if (navigator.share) {
+        navigator.share({
+            title: 'Share this radio station',
+            text: text,
+            url: url,
+        }).then(() => {
+            console.log('Thanks for sharing!');
+        }).catch(console.error);
+    } else {
+        // Web Share not supported, use custom sharing logic
+        let shareUrl;
 
-  window.open(shareUrl, '_blank');
+        switch(platform) {
+            case 'facebook':
+                shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+                break;
+            case 'twitter':
+                shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+                break;
+            case 'whatsapp':
+                shareUrl = `https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`;
+                break;
+            default:
+                console.error('Unsupported platform');
+                return;
+        }
+
+        // Open the share URL in a new window/tab
+        window.open(shareUrl, '_blank');
+    }
 }
-        
 
+// Usage
+document.getElementById('shareButton').addEventListener('click', () => {
+    if (navigator.share) {
+        share(); // Use Web Share API
+    } else {
+        // Show custom modal or dropdown to select platform
+        const platform = prompt('Choose a platform to share on (facebook, twitter, whatsapp):');
+        if (platform) {
+            share(platform);
+        }
+    }
+});
+        
 function toggleRecording() {
     if (!audioContext) {
         initializeAudioOnce();
