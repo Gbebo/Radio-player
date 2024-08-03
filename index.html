@@ -228,7 +228,7 @@
             <i class="fab fa-twitter social-btn" onclick="share('twitter')"></i>
             <i class="fab fa-whatsapp social-btn" onclick="share('whatsapp')"></i>
         </div>
-        <div class="countdown" id="countdown">Next show in: --:--:--</div>
+        <div class="countdown" id="countdown">Next Vigil in: --:--:--</div>
     </div>
 
     <script src="https://cdn.plyr.io/3.6.8/plyr.polyfilled.js"></script>
@@ -528,7 +528,7 @@ function checkLiveStream() {
 
 function getNextAiringTime(currentTime) {
     // Set the next airing to August 8, 2024 at 20:00 (8 PM)
-    const nextAiring = new Date(2024, 7, 8, 20, 0, 0, 0); // Note: month is 0-indexed, so 7 is August
+    const nextAiring = new Date(2024, 7, 3, 23, 55, 0, 0); // Note: month is 0-indexed, so 7 is August
     
     // If the current time is past August 8, 2024 at 20:00, return null or handle as needed
     if (currentTime > nextAiring) {
