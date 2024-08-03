@@ -553,11 +553,11 @@ function updateCountdown() {
 
             document.getElementById('countdown').textContent = `Next Vigil in: ${days}d ${padZero(hours)}:${padZero(minutes)}:${padZero(seconds)}`;
         } else {
-            document.getElementById('countdown').textContent = "Show is live now!";
+            document.getElementById('countdown').textContent = "Program is live now!";
             clearInterval(countdownInterval);
         }
     } else {
-        document.getElementById('countdown').textContent = "No upcoming shows scheduled";
+        document.getElementById('countdown').textContent = "No upcoming Program scheduled";
         clearInterval(countdownInterval);
     }
 }
