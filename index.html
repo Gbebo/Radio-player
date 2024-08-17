@@ -528,7 +528,7 @@ function checkLiveStream() {
 
 function getNextAiringTime(currentTime) {
     // Set the next airing to August 8, 2024 at 20:00 (8 PM)
-    const nextAiring = new Date(2024, 7, 3, 23, 55, 0, 0); // Note: month is 0-indexed, so 7 is August
+    const nextAiring = new Date(2024, 7, 17, 23, 55, 0, 0); // Note: month is 0-indexed, so 7 is August
     
     // If the current time is past August 8, 2024 at 20:00, return null or handle as needed
     if (currentTime > nextAiring) {
