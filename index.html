@@ -232,8 +232,8 @@
     </div>
 
     <script src="https://cdn.plyr.io/3.6.8/plyr.polyfilled.js"></script>
-    <script>
-       let player;
+<script> 
+let player;
 let audioContext;
 let analyser;
 let sleepTimerID;
@@ -245,6 +245,7 @@ let sourceNode;
 let destinationNode;
 let isStreamActive = false;
 let countdownInterval;
+let streamCheckTimeout;
 
 document.addEventListener('DOMContentLoaded', function() {
     const audioElement = document.getElementById('player');
@@ -262,10 +263,23 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         audioElement.play().catch(e => console.error("Playback failed:", e));
         checkLiveStream();
+        
+        // Clear any existing timeout
+        clearTimeout(streamCheckTimeout);
+        
+        // Set a new timeout to check stream status after 5 seconds
+        streamCheckTimeout = setTimeout(() => {
+            if (!isStreamActive) {
+                player.pause();
+                alert("No active stream detected. Playback stopped.");
+            }
+        }, 5000);
     });
 
     player.on('pause', () => {
         checkLiveStream();
+        // Clear the timeout when manually paused
+        clearTimeout(streamCheckTimeout);
     });
 
     // Check for live stream every 5 seconds
@@ -394,7 +408,6 @@ function share(platform) {
     const url = window.location.href;
     const text = "Join Us In this Powerful Prayer!";
 
-    // Check if Web Share API is supported
     if (navigator.share) {
         navigator.share({
             title: 'Share this Program',
@@ -404,7 +417,6 @@ function share(platform) {
             console.log('Thanks for sharing!');
         }).catch(console.error);
     } else {
-        // Web Share not supported, use custom sharing logic
         let shareUrl;
 
         switch(platform) {
@@ -422,24 +434,10 @@ function share(platform) {
                 return;
         }
 
-        // Open the share URL in a new window/tab
         window.open(shareUrl, '_blank');
     }
 }
 
-// Usage
-document.getElementById('shareButton').addEventListener('click', () => {
-    if (navigator.share) {
-        share(); // Use Web Share API
-    } else {
-        // Show custom modal or dropdown to select platform
-        const platform = prompt('Choose a platform to share on (facebook, twitter, whatsapp):');
-        if (platform) {
-            share(platform);
-        }
-    }
-});
-        
 function toggleRecording() {
     if (!audioContext) {
         initializeAudioOnce();
@@ -508,10 +506,16 @@ function updateRecordButtonState() {
 }
 
 function checkLiveStream() {
+    const audioElement = document.getElementById('player');
+    
+    // Check if the audio is actually producing sound
+    if (!audioElement.paused && !audioElement.ended && audioElement.currentTime > 0 && audioElement.readyState > 2) {
+        isStreamActive = true;
+    } else {
+        isStreamActive = false;
+    }
+
     const nowPlayingElement = document.querySelector('.now-playing');
-    // This is still a simplified check. In a real-world scenario, you'd want to
-    // implement a more robust method to detect if the stream is live.
-    isStreamActive = player.playing;
     
     if (isStreamActive) {
         nowPlayingElement.textContent = "Now Playing: Live Stream";
@@ -527,12 +531,10 @@ function checkLiveStream() {
 }
 
 function getNextAiringTime(currentTime) {
-    // Set the next airing to August 8, 2024 at 20:00 (8 PM)
-    const nextAiring = new Date(2024, 7, 17, 23, 55, 0, 0); // Note: month is 0-indexed, so 7 is August
+    const nextAiring = new Date(2024, 7, 17, 23, 55, 0, 0);
     
-    // If the current time is past August 8, 2024 at 20:00, return null or handle as needed
     if (currentTime > nextAiring) {
-        return null; // or handle this case as appropriate for your application
+        return null;
     }
     
     return nextAiring;
