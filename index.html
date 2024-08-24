@@ -33,11 +33,12 @@
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
             border: 1px solid rgba(255, 255, 255, 0.18);
-            padding: 30px;
+            padding: 50px 30px 30px; 
             position: relative;
         }
         .station-info {
             text-align: center;
+            margin-top: 10px; /* Add top margin */
             margin-bottom: 25px;
         }
         .station-name {
@@ -131,8 +132,8 @@
         }
         .hamburger-menu {
             position: absolute;
-            top: 20px;
-            left: 20px;
+            top: 15px;
+            left: 15px;
             z-index: 1000;
         }
         .hamburger-icon {
@@ -264,6 +265,14 @@
                 margin-left: auto;
                 margin-right: auto;
             }
+            .hamburger-menu {
+            top: 20px;
+           left: 20px;
+    }
+    
+    .station-info {
+        margin-top: 0; /* Remove top margin for larger screens */
+    }
         }
         @media screen and (min-width: 1024px) {
             .player-container {
