@@ -7,405 +7,411 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
     <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.0.7/css/all.css'>
     <style>
-        @charset "UTF-8";
+       @charset "UTF-8";
+*, *::before, *::after {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
 
-        *,
-        *::before,
-        *::after {
-            padding: 0;
-            margin: 0;
-            box-sizing: border-box;
-        }
+body {
+  font-size: 16px;
+  background-color: #26282B;
+}
 
-        body {
-            font-size: 16px;
-            background-color: #26282B;
-        }
+.btn {
+  cursor: pointer;
+  position: relative;
+  display: inline-block;
+  outline: none;
+  border-radius: 50%;
+  background-color: #050606;
+  background-image: linear-gradient(120deg, #47494B 0%, #18191D 100%);
+  color: #84878A;
+  text-align: center;
+  border-style: solid;
+  border-color: #2f3139;
+  font-family: "Font Awesome 5 Free";
+  font-weight: 600;
+  text-align: center;
+}
 
-        .btn {
-            cursor: pointer;
-            position: relative;
-            display: inline-block;
-            outline: none;
-            border-radius: 50%;
-            background-color: #050606;
-            background-image: linear-gradient(120deg, #47494B 0%, #18191D 100%);
-            color: #84878A;
-            text-align: center;
-            border-style: solid;
-            border-color: #2f3139;
-            font-family: "Font Awesome 5 Free";
-            font-weight: 600;
-            text-align: center;
-        }
+.btn::before {
+  font-family: "Font Awesome 5 Free";
+  content: "\f04b";
+  position: absolute;
+  top: 50%;
+  left: 54%;
+  transform: translate(-50%, -50%);
+  user-select: none;
+}
 
-        .btn::before {
-            font-family: "Font Awesome 5 Free";
-            content: "\f04b";
-            position: absolute;
-            top: 50%;
-            left: 54%;
-            transform: translate(-50%, -50%);
-            user-select: none;
-        }
+.btn--big {
+  font-size: 1.5rem;
+  height: 4.5rem;
+  width: 4.5rem;
+  border-width: 0.15rem;
+  line-height: 1;
+  box-shadow: -0.15rem -0.15rem 1rem #5b5b5b, 0.25rem 0.25rem 1rem #050606;
+}
 
-        .btn--big {
-            font-size: 1.5rem;
-            height: 4.5rem;
-            width: 4.5rem;
-            border-width: 0.15rem;
-            line-height: 1;
-            box-shadow: -0.15rem -0.15rem 1rem #5b5b5b, 0.25rem 0.25rem 1rem #050606;
-        }
+.btn--big:active, .btn--big.active {
+  box-shadow: inset 0.5rem 0.5rem 1rem rgba(209, 19, 2, 0.5), -0.15rem -0.15rem 1rem #5b5b5b, 0.25rem 0.25rem 1rem #050606;
+}
 
-        .btn--big:active,
-        .btn--big.active {
-            box-shadow: inset 0.5rem 0.5rem 1rem rgba(209, 19, 2, 0.5), -0.15rem -0.15rem 1rem #5b5b5b, 0.25rem 0.25rem 1rem #050606;
-        }
+.btn--small {
+  box-shadow: -0.15rem -0.15rem 0.75rem #6a6a6a, 0.15rem 0.15rem 0.75rem #050606;
+  font-size: 1rem;
+  height: 3rem;
+  width: 3rem;
+  border-width: 0.1rem;
+  line-height: 1;
+}
 
-        .btn--small {
-            box-shadow: -0.15rem -0.15rem 0.75rem #6a6a6a, 0.15rem 0.15rem 0.75rem #050606;
-            font-size: 1rem;
-            height: 3rem;
-            width: 3rem;
-            border-width: 0.1rem;
-            line-height: 1;
-        }
+.btn--small:active, .btn--small.active {
+  box-shadow: inset 0.5rem 0.5rem 1rem rgba(209, 19, 2, 0.5), -0.15rem -0.15rem 0.75rem #6a6a6a, 0.15rem 0.15rem 0.75rem #050606;
+}
 
-        .btn--small:active,
-        .btn--small.active {
-            box-shadow: inset 0.5rem 0.5rem 1rem rgba(209, 19, 2, 0.5), -0.15rem -0.15rem 0.75rem #6a6a6a, 0.15rem 0.15rem 0.75rem #050606;
-        }
+.btn:active, .btn.active {
+  border-color: #E8550C;
+  background-image: linear-gradient(120deg, #E8550C 0%, #f47333 100%);
+  color: #fff;
+}
 
-        .btn:active,
-        .btn.active {
-            border-color: #E8550C;
-            background-image: linear-gradient(120deg, #E8550C 0%, #f47333 100%);
-            color: #fff;
-        }
+.btn.play {
+  margin: 0 1.5rem;
+}
 
-        .btn.play {
-            margin: 0 1.5rem;
-        }
+.btn.play::before {
+  content: "\f04b";
+}
 
-        .btn.play::before {
-            content: "\f04b";
-        }
+.btn.play.pause {
+  border-color: #E8550C;
+  background-image: linear-gradient(120deg, #E8550C 0%, #f47333 100%);
+  color: #fff;
+  box-shadow: inset 0.5rem 0.5rem 1rem rgba(209, 19, 2, 0.5), -0.15rem -0.15rem 1rem #5b5b5b, 0.25rem 0.25rem 1rem #050606;
+}
 
-        .btn.play.pause {
-            border-color: #E8550C;
-            background-image: linear-gradient(120deg, #E8550C 0%, #f47333 100%);
-            color: #fff;
-            box-shadow: inset 0.5rem 0.5rem 1rem rgba(209, 19, 2, 0.5), -0.15rem -0.15rem 1rem #5b5b5b, 0.25rem 0.25rem 1rem #050606;
-        }
+.btn.play.pause::before {
+  content: "\f04c";
+}
 
-        .btn.play.pause::before {
-            content: "\f04c";
-        }
+.btn.prev::before {
+  content: "\f048";
+}
 
-        .btn.prev::before {
-            content: "\f048";
-        }
+.btn.next::before {
+  content: "\f051";
+}
 
-        .btn.next::before {
-            content: "\f051";
-        }
+.btn.back::before {
+  content: "\f053";
+}
 
-        .btn.back::before {
-            content: "\f053";
-        }
+.btn.playlist::before {
+  content: "\f0ca";
+}
 
-        .btn.playlist::before {
-            content: "\f0ca";
-        }
+.app {
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-image: linear-gradient(#343A3F 0%, #232528 100%);
+  border: 1px solid #393b3c;
+  border-radius: 2rem;
+  box-shadow: 0.25rem 0.25rem 1.75rem #18191D;
+  min-height: 100vh;
+}
 
-        .app {
-            padding: 1.5rem;
-            width: 100%;
-            max-width: 100%;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background-image: linear-gradient(#343A3F 0%, #232528 100%);
-            border: 1px solid #393b3c;
-            border-radius: 2rem;
-            box-shadow: 0.25rem 0.25rem 1.75rem #18191D;
-            min-height: 100vh;
-        }
+.app__head {
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 2rem;
+}
 
-        .app__head {
-            justify-content: space-between;
-            width: 100%;
-            margin-bottom: 2rem;
-        }
+.app__body {
+  margin: 1rem 0 2rem;
+  flex-direction: column;
+  width: 100%;
+  flex-grow: 1;
+  display: flex;
+  justify-content: space-between;
+}
 
-        .app__body {
-            margin: 1rem 0 2rem;
-            flex-direction: column;
-            width: 100%;
-            flex-grow: 1;
-            display: flex;
-            justify-content: space-between;
-        }
+.app__footer {
+  justify-content: center;
+  width: 100%;
+  margin-top: 2rem;
+}
 
-        .app__footer {
-            justify-content: center;
-            width: 100%;
-            margin-top: 2rem;
-        }
+.row {
+  display: flex;
+  width: 100%;
+}
 
-        .row {
-            display: flex;
-            width: 100%;
-        }
+.album {
+  align-self: center;
+  width: 100%;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
 
-        .album {
-            align-self: center;
-            width: 100%;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
+.album__img {
+  border: 0.5rem solid #18191D;
+  height: 70vw;
+  width: 70vw;
+  max-height: 300px;
+  max-width: 300px;
+  border-radius: 50%;
+  box-shadow: -0.25rem -0.25rem 1.25rem #444444, 0.25rem 0.25rem 1.25rem #050606;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  margin: 0 auto;
+}
 
-        .album__img {
-            border: 0.5rem solid #18191D;
-            height: 70vw;
-            width: 70vw;
-            max-height: 300px;
-            max-width: 300px;
-            border-radius: 50%;
-            box-shadow: -0.25rem -0.25rem 1.25rem #444444, 0.25rem 0.25rem 1.25rem #050606;
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: cover;
-            margin: 0 auto;
-        }
+.album__info {
+  margin-top: 2rem;
+  text-align: center;
+  color: #A7A8AA;
+}
 
-        .album__info {
-            margin-top: 2rem;
-            text-align: center;
-            color: #A7A8AA;
-        }
+.album__info-name {
+  font-size: 1.8rem;
+  padding-bottom: 0.5rem;
+}
 
-        .album__info-name {
-            font-size: 1.8rem;
-            padding-bottom: 0.5rem;
-        }
+.album__info-track {
+  padding-top: 0.25rem;
+  font-size: 1rem;
+}
 
-        .album__info-track {
-            padding-top: 0.25rem;
-            font-size: 1rem;
-        }
+.progress {
+  position: relative;
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
 
-        .progress {
-            position: relative;
-            margin-bottom: 1.5rem;
-            width: 100%;
-        }
+.progress__count {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: #6a6a6a;
+}
 
-        .progress__count {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.9rem;
-            color: #6a6a6a;
-        }
+.progress__bar {
+  position: relative;
+  margin-top: 1.25rem;
+  border-radius: 2.5rem;
+  width: 100%;
+  height: 0.5rem;
+  background-color: #24252b;
+  cursor: pointer;
+}
 
-        .progress__bar {
-            position: relative;
-            margin-top: 1.25rem;
-            border-radius: 2.5rem;
-            width: 100%;
-            height: 0.5rem;
-            background-color: #24252b;
-            cursor: pointer;
-        }
+.progress__bar::before {
+  content: "";
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  border-bottom: 0.1rem solid #6a6a6a;
+  border-left: 0.1rem solid #6a6a6a;
+  border-right: 0.05rem solid #6a6a6a;
+  z-index: 1;
+  border-radius: 2.5rem;
+  box-shadow: inset 0.25rem 0.15rem 0.25rem #000;
+}
 
-        .progress__bar::before {
-            content: "";
-            position: absolute;
-            height: 100%;
-            width: 100%;
-            box-sizing: border-box;
-            border-bottom: 0.1rem solid #6a6a6a;
-            border-left: 0.1rem solid #6a6a6a;
-            border-right: 0.05rem solid #6a6a6a;
-            z-index: 1;
-            border-radius: 2.5rem;
-            box-shadow: inset 0.25rem 0.15rem 0.25rem #000;
-        }
+.progress__bar-current {
+  transition: all 0.25s ease;
+  position: absolute;
+  background-image: linear-gradient(45deg, #D11302 0%, #f9ca24 100%);
+  height: calc(100% - 0.1rem);
+  width: 0%;
+  z-index: 3;
+  bottom: 0.05rem;
+  left: 0.1rem;
+  border-radius: 2.5rem;
+  box-shadow: inset 0px 0.1rem 0.15rem rgba(24, 25, 29, 0.5);
+}
 
-        .progress__bar-current {
-            transition: all 0.25s ease;
-            position: absolute;
-            background-image: linear-gradient(45deg, #D11302 0%, #f9ca24 100%);
-            height: calc(100% - 0.1rem);
-            width: 0%;
-            z-index: 3;
-            bottom: 0.05rem;
-            left: 0.1rem;
-            border-radius: 2.5rem;
-            box-shadow: inset 0px 0.1rem 0.15rem rgba(24, 25, 29, 0.5);
-        }
+.progress__bar-pin {
+  height: 1.5rem;
+  width: 1.5rem;
+  border-radius: 50%;
+  position: absolute;
+  left: 0%;
+  transition: all 0.25s ease;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  background-image: linear-gradient(120deg, #47494B 0%, #18191D 100%);
+  box-shadow: -0.25rem -0.25rem 0.75rem #444444, 0.15rem 0.15rem 0.75rem #050606, inset -0.15rem -0.15rem 0.25rem #18191D;
+}
 
-        .progress__bar-pin {
-            height: 1.5rem;
-            width: 1.5rem;
-            border-radius: 50%;
-            position: absolute;
-            left: 0%;
-            transition: all 0.25s ease;
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 10;
-            background-image: linear-gradient(120deg, #47494B 0%, #18191D 100%);
-            box-shadow: -0.25rem -0.25rem 0.75rem #444444, 0.15rem 0.15rem 0.75rem #050606, inset -0.15rem -0.15rem 0.25rem #18191D;
-        }
+.progress__bar-pin::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  height: 35%;
+  width: 35%;
+  background-color: #f9ca24;
+  box-shadow: -0.25rem -0.25rem 0.6rem #18191D, 0.25rem 0.25rem 0.6rem #6a6a6a, inset 0.1rem 0.1rem 0.25rem #777777;
+}
 
-        .progress__bar-pin::after {
-            content: "";
-            position: absolute;
-            border-radius: 50%;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            height: 35%;
-            width: 35%;
-            background-color: #f9ca24;
-            box-shadow: -0.25rem -0.25rem 0.6rem #18191D, 0.25rem 0.25rem 0.6rem #6a6a6a, inset 0.1rem 0.1rem 0.25rem #777777;
-        }
+.tracks {
+  position: absolute;
+}
 
-        .tracks {
-            position: absolute;
-        }
+@media (min-width: 768px) {
+  .app {
+    max-width: 400px;
+    padding: 2rem;
+    min-height: auto;
+    margin: 2rem auto;
+  }
 
-        @media (max-width: 767px) {
-            .app {
-                padding: 1rem;
-                max-width: 100%;
-                margin: 0;
-                min-height: 100vh;
-            }
+  .album__img {
+    height: 20rem;
+    width: 20rem;
+  }
 
-            .album__img {
-                height: 50vw;
-                width: 50vw;
-                max-height: 200px;
-                max-width: 200px;
-            }
+  .btn--big {
+    height: 5rem;
+    width: 5rem;
+  }
 
-            .btn--big {
-                font-size: 1.2rem;
-                height: 3.5rem;
-                width: 3.5rem;
-            }
+  .btn--small {
+    height: 3.5rem;
+    width: 3.5rem;
+  }
 
-            .btn--small {
-                font-size: 0.8rem;
-                height: 2.5rem;
-                width: 2.5rem;
-            }
+  .album__info-name {
+    font-size: 2rem;
+  }
 
-            .album__info-name {
-                font-size: 1.5rem;
-            }
+  .album__info-track {
+    font-size: 1.1rem;
+  }
+}
 
-            .album__info-track {
-                font-size: 1rem;
-            }
+@media (min-width: 1024px) {
+  body {
+    font-size: 18px;
+  }
 
-            .btn-group {
-                position: absolute;
-                top: 1rem;
-                right: 1rem;
-                display: flex;
-                flex-direction: column;
-            }
+  .app {
+    max-width: 450px;
+  }
 
-            .btn-group .btn {
-                margin: 0.25rem 0;
-            }
-        }
+  .album__img {
+    height: 25rem;
+    width: 25rem;
+  }
+}
 
-        @media (min-width: 768px) {
-            .app {
-                max-width: 400px;
-                padding: 2rem;
-                min-height: auto;
-                margin: 2rem auto;
-            }
+/* Added responsiveness for smaller screens */
+@media (max-width: 480px) {
+  .app {
+    padding: 2rem;
+    max-width: 90%;
+    margin: 1rem auto;
+    min-height: 80vh;
+  }
 
-            .album__img {
-                height: 20rem;
-                width: 20rem;
-            }
+  .album__img {
+    height: 60vw;
+    width: 60vw;
+    max-height: 200px;
+    max-width: 200px;
+  }
 
-            .btn--big {
-                height: 5rem;
-                width: 5rem;
-            }
+  .btn--big {
+    font-size: 1.5rem;
+    height: 4.5rem;
+    width: 4.5rem;
+  }
 
-            .btn--small {
-                height: 3.5rem;
-                width: 3.5rem;
-            }
+  .btn--small {
+    font-size: 1.2rem;
+    height: 3.5rem;
+    width: 3.5rem;
+  }
 
-            .album__info-name {
-                font-size: 2rem;
-            }
+  .album__info-name {
+    font-size: 1.5rem;
+  }
 
-            .album__info-track {
-                font-size: 1.1rem;
-            }
+  .album__info-track {
+    font-size: 1rem;
+  }
 
-            .btn-group {
-                display: flex;
-                justify-content: center;
-                width: 100%;
-                margin-top: 1rem;
-            }
+  .progress__bar {
+    height: 0.75rem;
+  }
 
-            .btn-group .btn {
-                margin: 0 0.5rem;
-            }
-        }
+  .progress__bar-pin {
+    height: 2rem;
+    width: 2rem;
+  }
+}
 
-        @media (min-width: 1024px) {
-            body {
-                font-size: 18px;
-            }
+@media (max-width: 360px) {
+  .app {
+    padding: 2.5rem;
+    max-width: 95%;
+    margin: 0.5rem auto;
+  }
 
-            .app {
-                max-width: 450px;
-            }
+  .album__img {
+    height: 70vw;
+    width: 70vw;
+    max-height: 220px;
+    max-width: 220px;
+  }
 
-            .album__img {
-                height: 25rem;
-                width: 25rem;
-            }
+  .btn--big {
+    font-size: 1.8rem;
+    height: 5rem;
+    width: 5rem;
+  }
 
-            .btn--small {
-                font-size: 0.8rem;
-                height: 2.5rem;
-                width: 2.5rem;
-                border-width: 0.1rem;
-                line-height: 1;
-            }
+  .btn--small {
+    font-size: 1.4rem;
+    height: 4rem;
+    width: 4rem;
+  }
 
-            .btn--small.download::before {
-                content: "\f019";
-            }
+  .album__info-name {
+    font-size: 1.8rem;
+  }
 
-            .btn--small.share::before {
-                content: "\f1e0";
-            }
+  .album__info-track {
+    font-size: 1.2rem;
+  }
 
-            .btn--small.cast::before {
-                content: "\f8ec";
-            }
-        }
+  .progress__bar {
+    height: 1rem;
+  }
+
+  .progress__bar-pin {
+    height: 2.5rem;
+    width: 2.5rem;
+  }
+}
+
     </style>
 </head>
 
