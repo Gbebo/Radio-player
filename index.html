@@ -1,712 +1,622 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <title>Simple Music Player - Vue JS | Неоморфизм / Neomorphism</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
-    <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.0.7/css/all.css'>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Radio Player</title>
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.6.8/plyr.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script type="text/javascript" src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
     <style>
-       @charset "UTF-8";
-*, *::before, *::after {
-  padding: 0;
-  margin: 0;
-  box-sizing: border-box;
-}
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(45deg, #8E2DE2, #4A00E0);
+            padding: 20px;
+        }
+        .player-container {
+            width: 100%;
+            max-width: 340px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 25px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            padding: 30px;
+        }
+        .station-info {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .station-name {
+            font-size: 28px;
+            font-weight: 700;
+            color: #FFD700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .now-playing {
+            font-size: 16px;
+            color: #FFA500;
+            font-weight: 400;
+        }
+        .plyr--audio .plyr__controls {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 15px;
+        }
+        .plyr--audio .plyr__control {
+            color: #FFD700;
+        }
+        .plyr--audio .plyr__control:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .plyr--audio .plyr__control[aria-expanded=true] {
+            background: rgba(255, 255, 255, 0.3);
+            color: #FFD700;
+        }
+        .plyr--full-ui input[type=range] {
+            color: #FFA500;
+        }
+        .plyr__progress input[type=range], .plyr__progress__buffer {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .plyr--full-ui input[type=range]::-webkit-slider-thumb {
+            background: #FFD700;
+        }
+        .plyr--full-ui input[type=range]:active::-webkit-slider-thumb {
+            background: #FFA500;
+        }
+        .plyr__time {
+            color: #FFD700;
+        }
+        .download-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-top: 20px;
+            background: linear-gradient(45deg, #FFA500, #FFD700);
+            border: none;
+            border-radius: 50px;
+            color: #4A00E0;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .download-btn:hover {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 165, 0, 0.4);
+        }
+        #equalizer {
+            width: 100%;
+            height: 50px;
+            margin-top: 20px;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .control-btn {
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 5px;
+            color: #FFD700;
+            cursor: pointer;
+        }
+        .social-share {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .social-btn {
+            margin: 0 5px;
+            font-size: 20px;
+            color: #FFD700;
+            cursor: pointer;
+        }
+        .countdown {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .countdown-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #FFD700;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .countdown-timer {
+            font-size: 24px;
+            font-weight: 700;
+            color: #FFA500;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .countdown-unit {
+            display: inline-block;
+            margin: 0 5px;
+            text-align: center;
+        }
+        .countdown-value {
+            font-size: 28px;
+            line-height: 1;
+        }
+        .countdown-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            opacity: 0.7;
+        }
 
-body {
-  font-size: 16px;
-  background-color: #26282B;
-}
+        @media screen and (min-width: 768px) {
+            .player-container {
+                max-width: 500px;
+                padding: 40px;
+            }
+            .station-name {
+                font-size: 32px;
+            }
+            .now-playing {
+                font-size: 18px;
+            }
+            .controls {
+                justify-content: space-around;
+            }
+        }
 
-.btn {
-  cursor: pointer;
-  position: relative;
-  display: inline-block;
-  outline: none;
-  border-radius: 50%;
-  background-color: #050606;
-  background-image: linear-gradient(120deg, #47494B 0%, #18191D 100%);
-  color: #84878A;
-  text-align: center;
-  border-style: solid;
-  border-color: #2f3139;
-  font-family: "Font Awesome 5 Free";
-  font-weight: 600;
-  text-align: center;
-}
+        @media screen and (min-width: 1024px) {
+            .player-container {
+                max-width: 600px;
+            }
+        }
 
-.btn::before {
-  font-family: "Font Awesome 5 Free";
-  content: "\f04b";
-  position: absolute;
-  top: 50%;
-  left: 54%;
-  transform: translate(-50%, -50%);
-  user-select: none;
-}
-
-.btn--big {
-  font-size: 1.5rem;
-  height: 4.5rem;
-  width: 4.5rem;
-  border-width: 0.15rem;
-  line-height: 1;
-  box-shadow: -0.15rem -0.15rem 1rem #5b5b5b, 0.25rem 0.25rem 1rem #050606;
-}
-
-.btn--big:active, .btn--big.active {
-  box-shadow: inset 0.5rem 0.5rem 1rem rgba(209, 19, 2, 0.5), -0.15rem -0.15rem 1rem #5b5b5b, 0.25rem 0.25rem 1rem #050606;
-}
-
-.btn--small {
-  box-shadow: -0.15rem -0.15rem 0.75rem #6a6a6a, 0.15rem 0.15rem 0.75rem #050606;
-  font-size: 1rem;
-  height: 3rem;
-  width: 3rem;
-  border-width: 0.1rem;
-  line-height: 1;
-}
-
-.btn--small:active, .btn--small.active {
-  box-shadow: inset 0.5rem 0.5rem 1rem rgba(209, 19, 2, 0.5), -0.15rem -0.15rem 0.75rem #6a6a6a, 0.15rem 0.15rem 0.75rem #050606;
-}
-
-.btn:active, .btn.active {
-  border-color: #E8550C;
-  background-image: linear-gradient(120deg, #E8550C 0%, #f47333 100%);
-  color: #fff;
-}
-
-.btn.play {
-  margin: 0 1.5rem;
-}
-
-.btn.play::before {
-  content: "\f04b";
-}
-
-.btn.play.pause {
-  border-color: #E8550C;
-  background-image: linear-gradient(120deg, #E8550C 0%, #f47333 100%);
-  color: #fff;
-  box-shadow: inset 0.5rem 0.5rem 1rem rgba(209, 19, 2, 0.5), -0.15rem -0.15rem 1rem #5b5b5b, 0.25rem 0.25rem 1rem #050606;
-}
-
-.btn.play.pause::before {
-  content: "\f04c";
-}
-
-.btn.prev::before {
-  content: "\f048";
-}
-
-.btn.next::before {
-  content: "\f051";
-}
-
-.btn.back::before {
-  content: "\f053";
-}
-
-.btn.playlist::before {
-  content: "\f0ca";
-}
-
-.app {
-  padding: 1.5rem;
-  width: 100%;
-  max-width: 100%;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background-image: linear-gradient(#343A3F 0%, #232528 100%);
-  border: 1px solid #393b3c;
-  border-radius: 2rem;
-  box-shadow: 0.25rem 0.25rem 1.75rem #18191D;
-  min-height: 100vh;
-}
-
-.app__head {
-  justify-content: space-between;
-  width: 100%;
-  margin-bottom: 2rem;
-}
-
-.app__body {
-  margin: 1rem 0 2rem;
-  flex-direction: column;
-  width: 100%;
-  flex-grow: 1;
-  display: flex;
-  justify-content: space-between;
-}
-
-.app__footer {
-  justify-content: center;
-  width: 100%;
-  margin-top: 2rem;
-}
-
-.row {
-  display: flex;
-  width: 100%;
-}
-
-.album {
-  align-self: center;
-  width: 100%;
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.album__img {
-  border: 0.5rem solid #18191D;
-  height: 70vw;
-  width: 70vw;
-  max-height: 300px;
-  max-width: 300px;
-  border-radius: 50%;
-  box-shadow: -0.25rem -0.25rem 1.25rem #444444, 0.25rem 0.25rem 1.25rem #050606;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: cover;
-  margin: 0 auto;
-}
-
-.album__info {
-  margin-top: 2rem;
-  text-align: center;
-  color: #A7A8AA;
-}
-
-.album__info-name {
-  font-size: 1.8rem;
-  padding-bottom: 0.5rem;
-}
-
-.album__info-track {
-  padding-top: 0.25rem;
-  font-size: 1rem;
-}
-
-.progress {
-  position: relative;
-  margin-bottom: 1.5rem;
-  width: 100%;
-}
-
-.progress__count {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.9rem;
-  color: #6a6a6a;
-}
-
-.progress__bar {
-  position: relative;
-  margin-top: 1.25rem;
-  border-radius: 2.5rem;
-  width: 100%;
-  height: 0.5rem;
-  background-color: #24252b;
-  cursor: pointer;
-}
-
-.progress__bar::before {
-  content: "";
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  box-sizing: border-box;
-  border-bottom: 0.1rem solid #6a6a6a;
-  border-left: 0.1rem solid #6a6a6a;
-  border-right: 0.05rem solid #6a6a6a;
-  z-index: 1;
-  border-radius: 2.5rem;
-  box-shadow: inset 0.25rem 0.15rem 0.25rem #000;
-}
-
-.progress__bar-current {
-  transition: all 0.25s ease;
-  position: absolute;
-  background-image: linear-gradient(45deg, #D11302 0%, #f9ca24 100%);
-  height: calc(100% - 0.1rem);
-  width: 0%;
-  z-index: 3;
-  bottom: 0.05rem;
-  left: 0.1rem;
-  border-radius: 2.5rem;
-  box-shadow: inset 0px 0.1rem 0.15rem rgba(24, 25, 29, 0.5);
-}
-
-.progress__bar-pin {
-  height: 1.5rem;
-  width: 1.5rem;
-  border-radius: 50%;
-  position: absolute;
-  left: 0%;
-  transition: all 0.25s ease;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 10;
-  background-image: linear-gradient(120deg, #47494B 0%, #18191D 100%);
-  box-shadow: -0.25rem -0.25rem 0.75rem #444444, 0.15rem 0.15rem 0.75rem #050606, inset -0.15rem -0.15rem 0.25rem #18191D;
-}
-
-.progress__bar-pin::after {
-  content: "";
-  position: absolute;
-  border-radius: 50%;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  height: 35%;
-  width: 35%;
-  background-color: #f9ca24;
-  box-shadow: -0.25rem -0.25rem 0.6rem #18191D, 0.25rem 0.25rem 0.6rem #6a6a6a, inset 0.1rem 0.1rem 0.25rem #777777;
-}
-
-.tracks {
-  position: absolute;
-}
-
-@media (min-width: 768px) {
-  .app {
-    max-width: 400px;
-    padding: 2rem;
-    min-height: auto;
-    margin: 2rem auto;
-  }
-
-  .album__img {
-    height: 20rem;
-    width: 20rem;
-  }
-
-  .btn--big {
-    height: 5rem;
-    width: 5rem;
-  }
-
-  .btn--small {
-    height: 3.5rem;
-    width: 3.5rem;
-  }
-
-  .album__info-name {
-    font-size: 2rem;
-  }
-
-  .album__info-track {
-    font-size: 1.1rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  body {
-    font-size: 18px;
-  }
-
-  .app {
-    max-width: 450px;
-  }
-
-  .album__img {
-    height: 25rem;
-    width: 25rem;
-  }
-}
-
-/* Added responsiveness for smaller screens */
-@media (max-width: 480px) {
-  .app {
-    padding: 2rem;
-    max-width: 90%;
-    margin: 1rem auto;
-    min-height: 80vh;
-  }
-
-  .album__img {
-    height: 60vw;
-    width: 60vw;
-    max-height: 200px;
-    max-width: 200px;
-  }
-
-  .btn--big {
-    font-size: 1.5rem;
-    height: 4.5rem;
-    width: 4.5rem;
-  }
-
-  .btn--small {
-    font-size: 1.2rem;
-    height: 3.5rem;
-    width: 3.5rem;
-  }
-
-  .album__info-name {
-    font-size: 1.5rem;
-  }
-
-  .album__info-track {
-    font-size: 1rem;
-  }
-
-  .progress__bar {
-    height: 0.75rem;
-  }
-
-  .progress__bar-pin {
-    height: 2rem;
-    width: 2rem;
-  }
-}
-
-@media (max-width: 360px) {
-  .app {
-    padding: 2.5rem;
-    max-width: 95%;
-    margin: 0.5rem auto;
-  }
-
-  .album__img {
-    height: 70vw;
-    width: 70vw;
-    max-height: 220px;
-    max-width: 220px;
-  }
-
-  .btn--big {
-    font-size: 1.8rem;
-    height: 5rem;
-    width: 5rem;
-  }
-
-  .btn--small {
-    font-size: 1.4rem;
-    height: 4rem;
-    width: 4rem;
-  }
-
-  .album__info-name {
-    font-size: 1.8rem;
-  }
-
-  .album__info-track {
-    font-size: 1.2rem;
-  }
-
-  .progress__bar {
-    height: 1rem;
-  }
-
-  .progress__bar-pin {
-    height: 2.5rem;
-    width: 2.5rem;
-  }
-}
-
+        @media (orientation: landscape) and (max-height: 500px) {
+            body {
+                align-items: flex-start;
+            }
+            .player-container {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: space-between;
+                align-items: center;
+                max-width: 90%;
+            }
+            .station-info {
+                width: 100%;
+                order: 1;
+                margin-bottom: 15px;
+            }
+            .plyr--audio {
+                width: 48%;
+                order: 2;
+            }
+            #equalizer {
+                width: 48%;
+                order: 3;
+                margin-top: 0;
+            }
+            .download-btn {
+                width: 100%;
+                order: 4;
+            }
+            .controls {
+                width: 100%;
+                order: 5;
+                margin-top: 15px;
+            }
+            .social-share {
+                width: 100%;
+                order: 6;
+                margin-top: 15px;
+            }
+            .countdown {
+                width: 100%;
+                order: 7;
+                margin-top: 15px;
+            }
+        }
     </style>
 </head>
-
 <body>
-    <div class="app" id="app">
-        <div class="row app__head">
-            <button class="btn btn--small back"></button>
-            <button class="btn btn--small playlist"></button>
+    <div class="player-container">
+        <div class="station-info">
+            <div class="station-name">Neon Beats FM</div>
+            <div class="now-playing">Now Playing: Live Stream</div>
         </div>
-        <div class="row app__body">
-            <div class="album">
-                <div class="album__img" v-if="$index === currentTrackIndex"
-                    :style="{ backgroundImage: `url(${track.cover})` }" v-for="(track, $index) in tracks" :key="$index">
-                </div>
-                <div class="album__info" v-if="currentTrack">
-                    <h3 class="album__info-name">{{ currentTrack.artist }}</h3>
-                    <p class="album__info-track">{{ currentTrack.name }}</p>
-                </div>
-            </div>
-            <div class="progress" ref="progress">
-                <div class="progress__count"><span>{{ currentTime }}</span><span>{{ duration }}</span></div>
-                <div class="progress__bar" @click="clickProgress">
-                    <div class="progress__bar-current" :style="{ width : barWidth }"></div>
-                    <div class="progress__bar-pin" :style="{ left : barWidth }"></div>
-                </div>
-            </div>
-            <div class="btn-group">
-                <button class="btn btn--small download" @click="downloadTrack"></button>
-                <button class="btn btn--small share" @click="shareTrack"></button>
-                <button class="btn btn--small cast" @click="castTrack"></button>
-            </div>
+        <audio id="player" crossorigin="anonymous">
+            <source src="https://s3.free-shoutcast.com/stream/18086" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+        <button id="recordButton" class="download-btn" onclick="toggleRecording()" disabled>
+            <i class="fas fa-record-vinyl"></i> Recording Unavailable
+        </button>
+        <canvas id="equalizer"></canvas>
+        <div class="controls">
+            <button class="control-btn" onclick="setSleepTimer()"><i class="fas fa-clock"></i> Sleep Timer</button>
+            <button class="control-btn" onclick="setAlarm()"><i class="fas fa-alarm-clock"></i> Set Alarm</button>
+            <button class="control-btn" id="castButton"><i class="fas fa-cast"></i> Cast</button>
         </div>
-        <div class="row app__footer">
-            <button class="btn prev btn--big" @click="prevTrack"></button>
-            <button class="btn play btn--big" @click="play" :class="{pause: isTimerPlaying}"></button>
-            <button class="btn next btn--big" @click="nextTrack"></button>
+        <div class="social-share">
+            <i class="fab fa-facebook social-btn" onclick="share('facebook')"></i>
+            <i class="fab fa-twitter social-btn" onclick="share('twitter')"></i>
+            <i class="fab fa-whatsapp social-btn" onclick="share('whatsapp')"></i>
+        </div>
+        <div class="countdown" id="countdown">
+            <div class="countdown-title">Next Program In</div>
+            <div class="countdown-timer" id="countdown-timer">
+                <span class="countdown-unit">
+                    <span class="countdown-value" id="countdown-days">00</span>
+                    <span class="countdown-label">days</span>
+                </span>
+                <span class="countdown-unit">
+                    <span class="countdown-value" id="countdown-hours">00</span>
+                    <span class="countdown-label">hours</span>
+                </span>
+                <span class="countdown-unit">
+                    <span class="countdown-value" id="countdown-minutes">00</span>
+                    <span class="countdown-label">minutes</span>
+                </span>
+                <span class="countdown-unit">
+                    <span class="countdown-value" id="countdown-seconds">00</span>
+                    <span class="countdown-label">seconds</span>
+                </span>
+            </div>
         </div>
     </div>
 
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.min.js'></script>
+    <script src="https://cdn.plyr.io/3.6.8/plyr.polyfilled.js"></script>
     <script>
-        new Vue({
-            el: "#app",
-            data() {
-                return {
-                    audio: null,
-                    circleLeft: null,
-                    barWidth: null,
-                    duration: null,
-                    currentTime: null,
-                    isTimerPlaying: false,
-                    tracks: [
-                        {
-                            name: "Genius ft. Sia, Diplo, Labrinth",
-                            artist: "LSD",
-                            cover: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/img/6.jpg",
-                            source: "https://s3.free-shoutcast.com/stream/18086",
-                            url: "https://s3.free-shoutcast.com/stream/18086",
-                            favorited: false
-                        },
-                        {
-                            name: "Extreme Ways",
-                            artist: "Moby",
-                            cover: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/img/3.jpg",
-                            source: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/mp3/3.mp3",
-                            url: "https://www.youtube.com/watch?v=ICjyAe9S54c",
-                            favorited: false
-                        },
-                        {
-                            name: "Everybody Knows",
-                            artist: "Leonard Cohen",
-                            cover: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/img/2.jpg",
-                            source: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/mp3/2.mp3",
-                            url: "https://www.youtube.com/watch?v=Lin-a2lTelg",
-                            favorited: true
-                        },
+        let player;
+let audioContext;
+let analyser;
+let sleepTimerID;
+let alarmTimerID;
+let mediaRecorder;
+let recordedChunks = [];
+let isRecording = false;
+let sourceNode;
+let destinationNode;
+let isStreamActive = false;
+let countdownInterval;
 
-                        {
-                            name: "Butterflies",
-                            artist: "Sia",
-                            cover: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/img/4.jpg",
-                            source: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/mp3/4.mp3",
-                            url: "https://www.youtube.com/watch?v=kYgGwWYOd9Y",
-                            favorited: false
-                        },
-                        {
-                            name: "The Final Victory",
-                            artist: "Haggard",
-                            cover: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/img/5.jpg",
-                            source: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/mp3/5.mp3",
-                            url: "https://www.youtube.com/watch?v=0WlpALnQdN8",
-                            favorited: true
-                        },
-                        {
-                            name: "The Comeback Kid",
-                            artist: "Lindi Ortega",
-                            cover: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/img/7.jpg",
-                            source: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/mp3/7.mp3",
-                            url: "https://www.youtube.com/watch?v=me6aoX0wCV8",
-                            favorited: true
-                        },
-                        {
-                            name: "Overdose",
-                            artist: "Grandson",
-                            cover: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/img/8.jpg",
-                            source: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/mp3/8.mp3",
-                            url: "https://www.youtube.com/watch?v=00-Rl3Jlx-o",
-                            favorited: false
-                        },
-                        {
-                            name: "Mekanın Sahibi",
-                            artist: "Norm Ender",
-                            cover: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/img/1.jpg",
-                            source: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/mp3/1.mp3",
-                            url: "https://www.youtube.com/watch?v=z3wAjJXbYzA",
-                            favorited: false
-                        },
-                        {
-                            name: "Rag'n'Bone Man",
-                            artist: "Human",
-                            cover: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/img/9.jpg",
-                            source: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/mp3/9.mp3",
-                            url: "https://www.youtube.com/watch?v=L3wKzyIN1yk",
-                            favorited: false
-                        }
-                    ],
-                    currentTrack: null,
-                    currentTrackIndex: 0,
-                    transitionName: null
-                };
-            },
-            methods: {
-                play() {
-                    if (this.audio.paused) {
-                        this.audio.play();
-                        this.isTimerPlaying = true;
-                    } else {
-                        this.audio.pause();
-                        this.isTimerPlaying = false;
-                    }
-                },
-                generateTime() {
-                    let width = (100 / this.audio.duration) * this.audio.currentTime;
-                    this.barWidth = width + "%";
-                    this.circleLeft = width + "%";
-                    let durmin = Math.floor(this.audio.duration / 60);
-                    let dursec = Math.floor(this.audio.duration - durmin * 60);
-                    let curmin = Math.floor(this.audio.currentTime / 60);
-                    let cursec = Math.floor(this.audio.currentTime - curmin * 60);
-                    if (durmin < 10) {
-                        durmin = "0" + durmin;
-                    }
-                    if (dursec < 10) {
-                        dursec = "0" + dursec;
-                    }
-                    if (curmin < 10) {
-                        curmin = "0" + curmin;
-                    }
-                    if (cursec < 10) {
-                        cursec = "0" + cursec;
-                    }
-                    this.duration = durmin + ":" + dursec;
-                    this.currentTime = curmin + ":" + cursec;
-                },
-                updateBar(x) {
-                    let progress = this.$refs.progress;
-                    let maxduration = this.audio.duration;
-                    let position = x - progress.offsetLeft;
-                    let percentage = (100 * position) / progress.offsetWidth;
-                    if (percentage > 100) {
-                        percentage = 100;
-                    }
-                    if (percentage < 0) {
-                        percentage = 0;
-                    }
-                    this.barWidth = percentage + "%";
-                    this.circleLeft = percentage + "%";
-                    this.audio.currentTime = (maxduration * percentage) / 100;
-                    this.audio.play();
-                },
-                clickProgress(e) {
-                    this.isTimerPlaying = true;
-                    this.audio.pause();
-                    this.updateBar(e.pageX);
-                },
-                prevTrack() {
-                    this.transitionName = "scale-in";
-                    this.isShowCover = false;
-                    if (this.currentTrackIndex > 0) {
-                        this.currentTrackIndex--;
-                    } else {
-                        this.currentTrackIndex = this.tracks.length - 1;
-                    }
-                    this.currentTrack = this.tracks[this.currentTrackIndex];
-                    this.resetPlayer();
-                },
-                nextTrack() {
-                    this.transitionName = "scale-out";
-                    this.isShowCover = false;
-                    if (this.currentTrackIndex < this.tracks.length - 1) {
-                        this.currentTrackIndex++;
-                    } else {
-                        this.currentTrackIndex = 0;
-                    }
-                    this.currentTrack = this.tracks[this.currentTrackIndex];
-                    this.resetPlayer();
-                },
-                resetPlayer() {
-                    this.barWidth = 0;
-                    this.circleLeft = 0;
-                    this.audio.currentTime = 0;
-                    this.audio.src = this.currentTrack.source;
-                    setTimeout(() => {
-                        if (this.isTimerPlaying) {
-                            this.audio.play();
-                        } else {
-                            this.audio.pause();
-                        }
-                    }, 300);
-                },
-                favorite() {
-                    this.tracks[this.currentTrackIndex].favorited = !this.tracks[
-                        this.currentTrackIndex
-                    ].favorited;
-                },
-                downloadTrack() {
-                    if (this.currentTrack) {
-                        const link = document.createElement('a');
-                        link.href = this.currentTrack.source;
-                        link.download = `${this.currentTrack.artist} - ${this.currentTrack.name}.mp3`;
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                    }
-                },
-                shareTrack() {
-                    if (this.currentTrack) {
-                        const shareData = {
-                            title: `${this.currentTrack.artist} - ${this.currentTrack.name}`,
-                            text: `Check out this awesome track: ${this.currentTrack.name} by ${this.currentTrack.artist}`,
-                            url: this.currentTrack.url
-                        };
+document.addEventListener('DOMContentLoaded', function() {
+    const audioElement = document.getElementById('player');
+    player = new Plyr(audioElement, {
+        controls: ['play', 'progress', 'current-time', 'mute', 'volume']
+    });
 
-                        if (navigator.share) {
-                            // Use Web Share API if available (mobile devices)
-                            navigator.share(shareData)
-                                .then(() => console.log('Successful share'))
-                                .catch((error) => console.log('Error sharing:', error));
-                        } else if (navigator.clipboard) {
-                            // Fallback to copying to clipboard
-                            const shareText = `${shareData.title}\n${shareData.text}\n${shareData.url}`;
-                            navigator.clipboard.writeText(shareText)
-                                .then(() => alert('Share info copied to clipboard!'))
-                                .catch((error) => console.log('Error copying to clipboard:', error));
-                        } else {
-                            // Fallback for unsupported browsers
-                            alert('Sharing is not supported on this browser. Please copy and paste the following:\n\n' +
-                                `${shareData.title}\n${shareData.text}\n${shareData.url}`);
-                        }
-                    }
-                },
-                castTrack() {
-                    // Placeholder for cast functionality
-                    alert('Casting functionality is not implemented in this demo');
-                }
-            },
-            created() {
-                let vm = this;
-                this.currentTrack = this.tracks[0];
-                this.audio = new Audio();
-                this.audio.src = this.currentTrack.source;
-                this.audio.ontimeupdate = function () {
-                    vm.generateTime();
-                };
-                this.audio.onloadedmetadata = function () {
-                    vm.generateTime();
-                };
-                this.audio.onended = function () {
-                    vm.nextTrack();
-                    this.isTimerPlaying = true;
-                };
+    player.on('ready', () => {
+        player.elements.buttons.play[0].addEventListener('click', initializeAudioOnce);
+    });
 
-                // this is optional (for preload covers)
-                for (let index = 0; index < this.tracks.length; index++) {
-                    const element = this.tracks[index];
-                    let link = document.createElement('link');
-                    link.rel = "prefetch";
-                    link.href = element.cover;
-                    link.as = "image"
-                    document.head.appendChild(link)
-                }
+    player.on('play', () => {
+        if (audioContext && audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
+        audioElement.play().catch(e => console.error("Playback failed:", e));
+        checkLiveStream();
+    });
+
+    player.on('pause', () => {
+        checkLiveStream();
+    });
+
+    // Check for live stream every 5 seconds
+    setInterval(checkLiveStream, 5000);
+
+    // Initialize record button state
+    updateRecordButtonState();
+
+    // Initialize countdown
+    updateCountdown();
+    countdownInterval = setInterval(updateCountdown, 1000);
+});
+
+function initializeAudioOnce() {
+    if (!audioContext) {
+        setupAudioContext();
+        setupEqualizer();
+        setupChromecast();
+    }
+    player.elements.buttons.play[0].removeEventListener('click', initializeAudioOnce);
+}
+
+function setupAudioContext() {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = audioContext.createAnalyser();
+    sourceNode = audioContext.createMediaElementSource(document.getElementById('player'));
+    destinationNode = audioContext.createMediaStreamDestination();
+    sourceNode.connect(analyser);
+    sourceNode.connect(destinationNode);
+    analyser.connect(audioContext.destination);
+}
+
+function setupEqualizer() {
+    const canvas = document.getElementById('equalizer');
+    const ctx = canvas.getContext('2d');
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+
+    function draw() {
+        requestAnimationFrame(draw);
+        analyser.getByteFrequencyData(dataArray);
+        ctx.fillStyle = 'rgb(0, 0, 0)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const barWidth = (canvas.width / bufferLength) * 2.5;
+        let x = 0;
+
+        for(let i = 0; i < bufferLength; i++) {
+            const barHeight = dataArray[i] / 2;
+            ctx.fillStyle = `rgb(${barHeight + 100}, 50, 50)`;
+            ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+            x += barWidth + 1;
+        }
+    }
+    draw();
+}
+
+function setSleepTimer() {
+    const minutes = prompt("Enter sleep timer duration in minutes:", "30");
+    if (minutes) {
+        clearTimeout(sleepTimerID);
+        sleepTimerID = setTimeout(() => {
+            player.pause();
+            alert("Sleep timer ended. Playback stopped.");
+        }, minutes * 60 * 1000);
+        alert(`Sleep timer set for ${minutes} minutes.`);
+    }
+}
+
+function setAlarm() {
+    const time = prompt("Enter alarm time (HH:MM):", "07:00");
+    if (time) {
+        const [hours, minutes] = time.split(':');
+        const alarmTime = new Date();
+        alarmTime.setHours(hours);
+        alarmTime.setMinutes(minutes);
+        alarmTime.setSeconds(0);
+        
+        const now = new Date();
+        let timeUntilAlarm = alarmTime - now;
+        if (timeUntilAlarm < 0) {
+            timeUntilAlarm += 24 * 60 * 60 * 1000; // Add a day if the time has passed
+        }
+        
+        clearTimeout(alarmTimerID);
+        alarmTimerID = setTimeout(() => {
+            player.play();
+            alert("Alarm! Your radio is now playing.");
+        }, timeUntilAlarm);
+        
+        alert(`Alarm set for ${time}.`);
+    }
+}
+
+function setupChromecast() {
+    window['__onGCastApiAvailable'] = function(isAvailable) {
+        if (isAvailable) {
+            initializeCastApi();
+        }
+    };
+
+    function initializeCastApi() {
+        cast.framework.CastContext.getInstance().setOptions({
+            receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+            autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
+        });
+
+        const castButton = document.getElementById('castButton');
+        castButton.addEventListener('click', () => {
+            const castSession = cast.framework.CastContext.getInstance().getCurrentSession();
+            if (castSession) {
+                const mediaInfo = new chrome.cast.media.MediaInfo(player.source, 'audio/mpeg');
+                const request = new chrome.cast.media.LoadRequest(mediaInfo);
+                castSession.loadMedia(request).then(
+                    () => console.log('Cast media loaded'),
+                    error => console.error('Error loading media', error)
+                );
+            } else {
+                cast.framework.CastContext.getInstance().requestSession();
             }
         });
-    </script>
+    }
+}
+
+function share(platform) {
+    const url = window.location.href;
+    const text = "Check out this awesome radio station!";
+
+    // Check if Web Share API is supported
+    if (navigator.share) {
+        navigator.share({
+            title: 'Share this radio station',
+            text: text,
+            url: url,
+        }).then(() => {
+            console.log('Thanks for sharing!');
+        }).catch(console.error);
+    } else {
+        // Web Share not supported, use custom sharing logic
+        let shareUrl;
+
+        switch(platform) {
+            case 'facebook':
+                shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+                break;
+            case 'twitter':
+                shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+                break;
+            case 'whatsapp':
+                shareUrl = `https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`;
+                break;
+            default:
+                console.error('Unsupported platform');
+                return;
+        }
+
+        // Open the share URL in a new window/tab
+        window.open(shareUrl, '_blank');
+    }
+}
+
+// Usage
+document.getElementById('shareButton').addEventListener('click', () => {
+    if (navigator.share) {
+        share(); // Use Web Share API
+    } else {
+        // Show custom modal or dropdown to select platform
+        const platform = prompt('Choose a platform to share on (facebook, twitter, whatsapp):');
+        if (platform) {
+            share(platform);
+        }
+    }
+});
+function toggleRecording() {
+    if (!audioContext) {
+        initializeAudioOnce();
+    }
+    if (!isStreamActive) {
+        alert("Cannot record. No active stream.");
+        return;
+    }
+    if (!isRecording) {
+        startRecording();
+    } else {
+        stopRecording();
+    }
+}
+
+function startRecording() {
+    if (!mediaRecorder) {
+        mediaRecorder = new MediaRecorder(destinationNode.stream);
+        mediaRecorder.ondataavailable = event => {
+            if (event.data.size > 0) {
+                recordedChunks.push(event.data);
+            }
+        };
+        mediaRecorder.onstop = saveRecording;
+    }
+
+    mediaRecorder.start();
+    isRecording = true;
+    updateRecordButtonState();
+}
+
+function stopRecording() {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+        isRecording = false;
+        updateRecordButtonState();
+    }
+}
+
+function saveRecording() {
+    const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    document.body.appendChild(a);
+    a.style = 'display: none';
+    a.href = url;
+    a.download = 'radio_recording.webm';
+    a.click();
+    window.URL.revokeObjectURL(url);
+    recordedChunks = [];
+}
+
+function updateRecordButtonState() {
+    const recordButton = document.getElementById('recordButton');
+    if (isStreamActive) {
+        recordButton.disabled = false;
+        if (isRecording) {
+            recordButton.innerHTML = '<i class="fas fa-stop-circle"></i> Stop Recording';
+        } else {
+            recordButton.innerHTML = '<i class="fas fa-record-vinyl"></i> Start Recording';
+        }
+    } else {
+        recordButton.disabled = true;
+        recordButton.innerHTML = '<i class="fas fa-record-vinyl"></i> Recording Unavailable';
+    }
+}
+
+function checkLiveStream() {
+    const nowPlayingElement = document.querySelector('.now-playing');
+    // This is still a simplified check. In a real-world scenario, you'd want to
+    // implement a more robust method to detect if the stream is live.
+    isStreamActive = player.playing;
+    
+    if (isStreamActive) {
+        nowPlayingElement.textContent = "Now Playing: Live Stream";
+        nowPlayingElement.classList.add('live');
+    } else {
+        nowPlayingElement.textContent = "Stream Offline";
+        nowPlayingElement.classList.remove('live');
+        if (isRecording) {
+            stopRecording();
+        }
+    }
+    updateRecordButtonState();
+}
+
+function getNextAiringTime(currentTime) {
+    // Set the next airing to August 8, 2024 at 20:00 (8 PM)
+    const nextAiring = new Date(2024, 7, 23, 23, 55, 0, 0); // Note: month is 0-indexed, so 7 is August
+    
+    // If the current time is past August 8, 2024 at 20:00, return null or handle as needed
+    if (currentTime > nextAiring) {
+        return null; // or handle this case as appropriate for your application
+    }
+    
+    return nextAiring;
+}
+
+function updateCountdown() {
+            const now = new Date();
+            const nextAiring = getNextAiringTime(now);
+
+            if (nextAiring) {
+                const timeRemaining = nextAiring - now;
+
+                if (timeRemaining > 0) {
+                    const days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+
+                    document.getElementById('countdown-days').textContent = padZero(days);
+                    document.getElementById('countdown-hours').textContent = padZero(hours);
+                    document.getElementById('countdown-minutes').textContent = padZero(minutes);
+                    document.getElementById('countdown-seconds').textContent = padZero(seconds);
+                } else {
+                    document.getElementById('countdown-timer').textContent = "Program is live now!";
+                    clearInterval(countdownInterval);
+                }
+            } else {
+                document.getElementById('countdown-timer').textContent = "No upcoming Program scheduled";
+                clearInterval(countdownInterval);
+            }
+        }
+
+function padZero(num) {
+    return num.toString().padStart(2, '0');
+}
     </script>
 </body>
-
 </html>
