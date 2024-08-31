@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Simple Music Player - Vue JS | Неоморфизм / Neomorphism</title>
+  <title>Power Of Prayer-FM</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
   <link rel='stylesheet' href='https://use.fontawesome.com/releases/v5.0.7/css/all.css'>
   <style>
@@ -120,6 +120,21 @@
       content: "\f0c9";
     }
 
+    .btn.record::before {
+      content: "\f111";
+      /* Font Awesome circle icon */
+    }
+
+    .btn.record.recording {
+      color: #ff0000;
+      animation: pulse 1s infinite;
+    }
+
+    .btn.share::before {
+      content: "\f1e0";
+      /* Font Awesome share icon */
+    }
+
     .app {
       padding: 1.75rem;
       max-width: 100%;
@@ -136,6 +151,8 @@
     .app__head {
       justify-content: space-between;
       width: 100%;
+      display: flex;
+      align-items: center;
     }
 
     .app__body {
@@ -303,6 +320,80 @@
       margin-bottom: 0.5rem;
     }
 
+    .record-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    .record-controls .btn {
+      margin: 0 5px;
+    }
+
+    .record-status {
+      margin: 0 10px;
+      color: #fff;
+      font-size: 0.9rem;
+    }
+
+    .app__title {
+      font-size: 1.2rem;
+      color: #fff;
+      margin: 0;
+      text-align: center;
+      flex-grow: 1;
+    }
+
+    .gradient-text {
+      background: linear-gradient(45deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-fill-color: transparent;
+      display: inline-block;
+      font-weight: bold;
+    }
+
+    .overlay-content {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-width: 80%;
+    }
+
+    .ok-button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #E8550C;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    .ok-button:hover {
+      background-color: #f47333;
+    }
+
+    @keyframes pulse {
+      0% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.5;
+      }
+
+      100% {
+        opacity: 1;
+      }
+    }
+
     @media (min-width: 768px) {
       .app {
         max-width: 400px;
@@ -392,6 +483,16 @@
       .progress__count {
         font-size: 0.6rem;
       }
+
+      .record-controls {
+        flex-wrap: wrap;
+      }
+
+      .record-status {
+        width: 100%;
+        text-align: center;
+        margin: 5px 0;
+      }
     }
 
     @media (max-width: 320px) {
@@ -421,80 +522,38 @@
       }
     }
 
-    .overlay-content {
-      background-color: rgba(255, 255, 255, 0.1);
+    .custom-alert {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #343A3F;
+      border: 1px solid #393b3c;
       border-radius: 10px;
       padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
       max-width: 80%;
-    }
-
-    .upcoming-programs {
-      color: #fff;
       text-align: center;
     }
 
-    .upcoming-programs h2 {
-      font-size: 1.5rem;
-      margin-bottom: 1rem;
-    }
-
-    .upcoming-programs ul {
-      list-style-type: none;
-      padding: 0;
+    .custom-alert p {
+      color: #fff;
       margin-bottom: 20px;
     }
 
-    .upcoming-programs li {
-      font-size: 1.2rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .ok-button {
-      margin-top: 20px;
-      padding: 10px 20px;
+    .custom-alert button {
       background-color: #E8550C;
       color: white;
       border: none;
+      padding: 10px 20px;
       border-radius: 5px;
       cursor: pointer;
       font-size: 1rem;
     }
 
-    .ok-button:hover {
+    .custom-alert button:hover {
       background-color: #f47333;
-    }
-
-    .app__head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      width: 100%;
-    }
-
-    .app__title {
-      font-size: 1.2rem;
-      color: #fff;
-      margin: 0;
-      text-align: center;
-      flex-grow: 1;
-    }
-
-    .gradient-text {
-      background: linear-gradient(45deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      text-fill-color: transparent;
-      display: inline-block;
-      font-weight: bold;
-    }
-
-    .btn.back,
-    .btn.menu {
-      flex-shrink: 0;
     }
   </style>
 </head>
@@ -504,7 +563,7 @@
     <div class="app" v-if="isLoaded">
       <div class="row app__head">
         <button class="btn btn--small back"></button>
-        <h1 class="app__title"><span class="gradient-text">Power Of Prayer</span></h1>
+        <h1 class="app__title"><span class="gradient-text">Music Player</span></h1>
         <button class="btn btn--small menu" @click="toggleOverlay"></button>
       </div>
       <div class="row app__body">
@@ -522,10 +581,15 @@
             <div class="progress__bar-pin" :style="{ left: barWidth }"></div>
           </div>
         </div>
+        <div class="record-controls">
+          <button class="btn btn--small record" @click="toggleRecording" :class="{ 'recording': isRecording }"></button>
+          <span class="record-status">{{ recordingStatus }}</span>
+          <button class="btn btn--small share" @click="shareTrack"></button>
+        </div>
       </div>
       <div class="row app__footer">
         <button class="btn prev btn--big" @click="prevTrack"></button>
-        <button class="btn play btn--big" @click="play" :class="{pause: isTimerPlaying}"></button>
+        <button class="btn play btn--big" @click="togglePlay" :class="{pause: isTimerPlaying}"></button>
         <button class="btn next btn--big" @click="nextTrack"></button>
       </div>
       <div class="overlay" v-if="showOverlay">
@@ -543,97 +607,147 @@
       </div>
     </div>
     <div v-else>Loading...</div>
-  </div>
 
+    <!-- Custom Alert Component -->
+    <div class="custom-alert" v-if="showAlert">
+      <p>{{ alertMessage }}</p>
+      <button @click="closeAlert">OK</button>
+    </div>
+  </div>
   <script src='https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js'></script>
   <script>
     new Vue({
       el: "#app",
       data: {
-        audio: null,
-        circleLeft: null,
-        barWidth: null,
-        duration: null,
-        currentTime: null,
+        audioContext: null,
+        sourceNode: null,
+        gainNode: null,
+        analyserNode: null,
+        currentBuffer: null,
+        startTime: 0,
+        pausedAt: 0,
         isTimerPlaying: false,
+        currentTime: '00:00',
+        duration: '00:00',
+        barWidth: '0%',
+        circleLeft: '0%',
         tracks: [
           {
-            name: "Genius ft. Sia, Diplo, Labrinth",
-            artist: "LSD",
-            cover: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/img/6.jpg",
-            source: "https://raw.githubusercontent.com/muhammederdem/mini-player/master/mp3/1.mp3",
-            url: "https://www.youtube.com/watch?v=HhoATZ1Imtw",
+            name: "God's Favour",
+            artist: "",
+            cover: "https://res.cloudinary.com/softcraft/image/upload/v1725067656/PngItem_3830181_vkpeyu.png",
+            source: "https://s3.free-shoutcast.com/stream/18086",
+
             favorited: false
           },
-          // ... (keep other tracks) ...
+          // ... other tracks ...
         ],
         currentTrack: null,
         currentTrackIndex: 0,
         transitionName: null,
+        isShowCover: false,
+        isLoaded: false,
         showOverlay: false,
         upcomingPrograms: [
           { day: 'Thursday', time: '4:40 PM', date: null, countdown: '' },
           { day: 'Saturday', time: '12:00 AM', date: null, countdown: '' },
           { day: 'Sunday', time: '10:00 AM', date: null, countdown: '' }
         ],
-        isLoaded: false
+        isRecording: false,
+        recordingStatus: '============',
+        mediaRecorder: null,
+        audioChunks: [],
+        recordedAudioUrl: null,
+        canShare: false,
+        isStreamActive: false
       },
       methods: {
-        toggleOverlay() {
-          this.showOverlay = !this.showOverlay;
+        async initAudio() {
+          this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          this.gainNode = this.audioContext.createGain();
+          this.analyserNode = this.audioContext.createAnalyser();
+          this.gainNode.connect(this.analyserNode);
+          this.analyserNode.connect(this.audioContext.destination);
         },
-        play() {
-          if (this.audio.paused) {
-            this.audio.play();
-            this.isTimerPlaying = true;
+        async loadAudio(url) {
+          const response = await fetch(url);
+          const arrayBuffer = await response.arrayBuffer();
+          const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+          this.currentBuffer = audioBuffer;
+          this.duration = this.formatTime(audioBuffer.duration);
+        },
+        togglePlay() {
+          if (this.isTimerPlaying) {
+            this.pause();
           } else {
-            this.audio.pause();
+            this.play();
+          }
+        },
+        async play() {
+          if (this.audioContext.state === 'suspended') {
+            await this.audioContext.resume();
+          }
+
+          if (this.sourceNode) {
+            this.sourceNode.stop();
+          }
+
+          this.sourceNode = this.audioContext.createBufferSource();
+          this.sourceNode.buffer = this.currentBuffer;
+          this.sourceNode.connect(this.gainNode);
+
+          const offset = this.pausedAt / 1000;
+          this.startTime = Date.now() - this.pausedAt;
+          this.sourceNode.start(0, offset);
+
+          this.isTimerPlaying = true;
+          this.isStreamActive = true;
+          this.updateAudioTime();
+        },
+        pause() {
+          if (this.sourceNode) {
+            this.sourceNode.stop();
+            this.pausedAt = Date.now() - this.startTime;
             this.isTimerPlaying = false;
+            this.isStreamActive = false;
           }
         },
-        generateTime() {
-          let width = (100 / this.audio.duration) * this.audio.currentTime;
-          this.barWidth = width + "%";
-          this.circleLeft = width + "%";
-          let durmin = Math.floor(this.audio.duration / 60);
-          let dursec = Math.floor(this.audio.duration - durmin * 60);
-          let curmin = Math.floor(this.audio.currentTime / 60);
-          let cursec = Math.floor(this.audio.currentTime - curmin * 60);
-          if (durmin < 10) {
-            durmin = "0" + durmin;
+        updateAudioTime() {
+          if (this.isTimerPlaying) {
+            const elapsed = (Date.now() - this.startTime) / 1000;
+            this.currentTime = this.formatTime(elapsed);
+            const progress = (elapsed / this.currentBuffer.duration) * 100;
+            this.barWidth = `${progress}%`;
+            this.circleLeft = `${progress}%`;
+
+            if (elapsed >= this.currentBuffer.duration) {
+              this.nextTrack();
+            } else {
+              requestAnimationFrame(this.updateAudioTime);
+            }
           }
-          if (dursec < 10) {
-            dursec = "0" + dursec;
-          }
-          if (curmin < 10) {
-            curmin = "0" + curmin;
-          }
-          if (cursec < 10) {
-            cursec = "0" + cursec;
-          }
-          this.duration = durmin + ":" + dursec;
-          this.currentTime = curmin + ":" + cursec;
         },
-        updateBar(x) {
-          let progress = this.$refs.progress;
-          let maxduration = this.audio.duration;
-          let position = x - progress.offsetLeft;
-          let percentage = (100 * position) / progress.offsetWidth;
-          if (percentage > 100) {
-            percentage = 100;
+        formatTime(time) {
+          const minutes = Math.floor(time / 60);
+          const seconds = Math.floor(time % 60);
+          return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        },
+        async resetPlayer() {
+          this.pausedAt = 0;
+          this.startTime = 0;
+          this.barWidth = '0%';
+          this.circleLeft = '0%';
+          await this.loadAudio(this.currentTrack.source);
+          if (this.isTimerPlaying) {
+            this.play();
           }
-          if (percentage < 0) {
-            percentage = 0;
-          }
-          this.barWidth = percentage + "%";
-          this.circleLeft = percentage + "%";
-          this.audio.currentTime = (maxduration * percentage) / 100;
-          this.audio.play();
         },
         clickProgress(e) {
-          this.isTimerPlaying = true;
-          this.audio.pause();
-          this.updateBar(e.pageX);
+          const progress = this.$refs.progress;
+          const clickPosition = (e.pageX - progress.offsetLeft) / progress.offsetWidth;
+          const jumpTo = clickPosition * this.currentBuffer.duration;
+          this.pausedAt = jumpTo * 1000;
+          this.play();
         },
         prevTrack() {
           this.transitionName = "scale-in";
@@ -657,23 +771,8 @@
           this.currentTrack = this.tracks[this.currentTrackIndex];
           this.resetPlayer();
         },
-        resetPlayer() {
-          this.barWidth = 0;
-          this.circleLeft = 0;
-          this.audio.currentTime = 0;
-          this.audio.src = this.currentTrack.source;
-          setTimeout(() => {
-            if (this.isTimerPlaying) {
-              this.audio.play();
-            } else {
-              this.audio.pause();
-            }
-          }, 300);
-        },
         favorite() {
-          this.tracks[this.currentTrackIndex].favorited = !this.tracks[
-            this.currentTrackIndex
-          ].favorited;
+          this.tracks[this.currentTrackIndex].favorited = !this.tracks[this.currentTrackIndex].favorited;
         },
         toggleOverlay() {
           this.showOverlay = !this.showOverlay;
@@ -716,32 +815,105 @@
 
           return targetDate;
         },
+        toggleRecording() {
+          if (!this.isStreamActive) {
+            alert("Please start playback before recording.");
+            return;
+          }
+
+          if (!this.isRecording) {
+            this.startRecording();
+          } else {
+            this.stopRecording();
+          }
+        },
+        showCustomAlert(message) {
+          this.alertMessage = message;
+          this.showAlert = true;
+        },
+
+        closeAlert() {
+          this.showAlert = false;
+        },
+        startRecording() {
+          const dest = this.audioContext.createMediaStreamDestination();
+          this.gainNode.connect(dest);
+
+          this.mediaRecorder = new MediaRecorder(dest.stream);
+          this.audioChunks = [];
+
+          this.mediaRecorder.ondataavailable = (event) => {
+            if (event.data.size > 0) {
+              this.audioChunks.push(event.data);
+            }
+          };
+
+          this.mediaRecorder.onstop = () => {
+            const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
+            this.recordedAudioUrl = URL.createObjectURL(audioBlob);
+            this.downloadRecording();
+          };
+
+          this.mediaRecorder.start();
+          this.isRecording = true;
+          this.recordingStatus = 'Recording...';
+        },
+        stopRecording() {
+          if (this.mediaRecorder && this.isRecording) {
+            this.mediaRecorder.stop();
+            this.isRecording = false;
+            this.recordingStatus = 'Recording finished. Downloading...';
+          }
+        },
+        downloadRecording() {
+          if (this.recordedAudioUrl) {
+            const a = document.createElement('a');
+            document.body.appendChild(a);
+            a.style = 'display: none';
+            a.href = this.recordedAudioUrl;
+            a.download = 'recorded_audio.webm';
+            a.click();
+            window.URL.revokeObjectURL(this.recordedAudioUrl);
+            document.body.removeChild(a);
+            this.recordingStatus = 'Recording downloaded';
+          }
+        },
+        shareTrack() {
+          const shareData = {
+            title: `${this.currentTrack.artist} - ${this.currentTrack.name}`,
+            text: `Check out this awesome track: ${this.currentTrack.artist} - ${this.currentTrack.name}`,
+            url: this.currentTrack.url || window.location.href,
+          };
+
+          if (navigator.share && this.canShare) {
+            navigator.share(shareData)
+              .then(() => console.log('Shared successfully'))
+              .catch((error) => console.log('Error sharing:', error));
+          } else {
+            // Fallback for desktop or browsers that don't support Web Share API
+            prompt('Copy this link to share:', shareData.url);
+          }
+        },
       },
-      created() {
-        let vm = this;
+      async created() {
+        await this.initAudio();
         this.currentTrack = this.tracks[0];
-        this.audio = new Audio();
-        this.audio.src = this.currentTrack.source;
-        this.audio.ontimeupdate = function () {
-          vm.generateTime();
-        };
-        this.audio.onloadedmetadata = function () {
-          vm.generateTime();
-        };
-        this.audio.onended = function () {
-          vm.nextTrack();
-          vm.isTimerPlaying = true;
-        };
+        await this.loadAudio(this.currentTrack.source);
 
         this.updateCountdowns();
         setInterval(this.updateCountdowns, 1000);
 
-        // Set isLoaded to true when everything is ready
         this.$nextTick(() => {
           this.isLoaded = true;
         });
+      },
+      mounted() {
+        // Check if Web Share API is supported
+        this.canShare = navigator.share !== undefined;
       }
     });
   </script>
+
 </body>
+
 </html>
